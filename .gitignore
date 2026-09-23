@@ -1,0 +1,42 @@
+# Dependencias y builds
+node_modules/
+dist/
+tmp/
+out/
+release/
+.angular/
+.nx/cache/
+.nx/workspace-data/
+coverage/
+
+# Binarios y modelos (se descargan con tools/fetch-binaries)
+bin/
+*.bin
+*.gguf
+
+# Secretos
+.env
+.env.*
+!.env.example
+*.token.json
+credentials*.json
+
+# Datos locales
+*.db
+*.db-journal
+*.sqlite
+hefesto-home/
+logs/
+*.log
+
+# Medios generados
+*.mp4
+*.wav
+*.mp3
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
