@@ -45,3 +45,15 @@ Lo que **le falta** y es el foco de Hefesto Engine Studio:
 ## Primer caso de uso
 
 Canales de **contenido cristiano en español** (oraciones, versículos, devocionales, historias bíblicas) en TikTok y YouTube Shorts. Ver [08 · Nicho cristiano](08-nicho-cristiano.md).
+
+## Canales de ejemplo (prototipo)
+
+| Canal | Plataforma | Nicho |
+|---|---|---|
+| Fe Diaria | TikTok | Cristiano: oraciones y versículos |
+| Fe Diaria Shorts | YouTube | Cristiano |
+| Salmos para Hoy | TikTok | Cristiano: salmos |
+| Poké Crónicas | YouTube | Pokémon: historia, lore y datos curiosos |
+| Sin Excusas | TikTok | Motivación y rutinas de ejercicio cortas |
+
+El sistema es **agnóstico al nicho**: cada canal trae su "biblia del canal" y sus reglas de QA. Por ejemplo, en Poké Crónicas los datos deben tener fuente verificable (el QA marca "dato sin fuente"). En Sin Excusas, los ejercicios llevan un aviso de salud.

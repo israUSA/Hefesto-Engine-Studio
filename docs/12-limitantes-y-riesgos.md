@@ -16,3 +16,5 @@
 | 12 | **Tamaño del instalador** de Electron (binarios CUDA) | Descarga pesada | Descargar el modelo de Whisper en el primer arranque |
 | 13 | **Curva de aprendizaje** de Angular y Nest (por confirmar) | Fases 1–2 más lentas | Ajustar el roadmap y empezar por el pipeline MVP |
 | 14 | **Espacio en disco** con muchos renders | Disco lleno | Liberar espacio de lo verificado en Drive, alerta de disco |
+| 15 | **Propiedad intelectual de Pokémon** (Nintendo, Game Freak, The Pokémon Company) en Poké Crónicas | Reclamos de Content ID, retiradas o desmonetización | No usar sprites, arte oficial, clips del anime ni música del juego. Visuales propios o genéricos (consolas, estética retro) y un enfoque de comentario o análisis |
+| 16 | **Consejos de ejercicio** en Sin Excusas | Lesiones, reportes | Aviso de salud fijo, ejercicios de bajo riesgo, nunca consejos médicos |

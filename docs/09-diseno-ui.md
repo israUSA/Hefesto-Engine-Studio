@@ -8,21 +8,43 @@
 
 Pen.dev se puede usar directamente desde las sesiones de Claude Code (MCP de Pencil), así el diseño y el código salen del mismo lugar. Google Stitch (Gemini) sirve solo para explorar ideas rápidas, no como fuente de verdad.
 
-## Identidad: "la forja"
+## Identidad: editorial moderna, no rústica
 
-Hefesto, dios herrero: metal, fuego contenido, precisión.
+Hefesto se expresa con **precisión, no con piedra**: nada de texturas, metal envejecido ni clichés de fragua. Lo "forjado" vive en el lenguaje ("Forjando", "¿Qué forjamos hoy?") y en un único acento incandescente.
 
-| Token | Propuesta inicial |
-|---|---|
-| Fondo | grafito muy oscuro, casi negro con un leve tinte cálido |
-| Superficies | 2–3 niveles de grafito, bordes finos de 1 px |
-| Acento primario | **metal fundido**: naranja-ámbar incandescente |
-| Acento secundario | acero o azul frío, para estados informativos |
-| Éxito / aviso / error | verde, ámbar, rojo desaturados |
-| Tipografía UI | sans geométrica y legible |
-| Tipografía de datos | monoespaciada para IDs, tiempos y logs |
+**Fuente de verdad:** `design/hefesto.pen` (pen.dev). Pantallas actuales: Hoy (oscuro y claro), Canal (detalle) y Producir, más el tablero de componentes y tres versiones del logo.
 
-También hay un tema claro, definido con los mismos tokens. Los valores exactos se fijan en pen.dev.
+### Tokens de color (variables con tema `mode: dark | light`)
+
+| Token | Oscuro | Claro | Uso |
+|---|---|---|---|
+| `bg` | `#0A0A0B` | `#F2F1ED` | fondo de la app y la barra lateral |
+| `surface` | `#121214` | `#FFFFFF` | panel principal |
+| `surface-2` / `surface-3` | `#19191C` / `#222226` | `#E9E8E2` / `#DEDCD5` | elementos activos, pistas de barras |
+| `line` / `line-strong` | `#232327` / `#34343A` | `#DAD8D0` / `#C4C1B7` | bordes de 1 px |
+| `text` / `text-2` / `text-3` | `#F3F2EF` / `#A3A29D` / `#8A8984` | `#121211` / `#55534E` / `#76736B` | jerarquía de texto (text-3 ajustado para contraste) |
+| `accent` | `#FF5B1F` | `#F04A0C` | **metal fundido**: 1 CTA + el estado "forjando" por vista |
+| `ok` / `warn` / `danger` / `steel` | verde / ámbar / rojo / azul acero | versiones más oscuras | estados; cada uno con su variante `-soft` para fondos |
+| `sub-highlight` | `#FFD23F` | igual | color de subtítulos del **brand kit** (contenido, no UI) |
+
+### Tipografía
+
+| Rol | Fuente | Uso |
+|---|---|---|
+| UI | **Geist** | todo el texto de interfaz |
+| Datos | **Geist Mono** | etiquetas en mayúsculas, horas, IDs, costos, telemetría |
+| Display | **Instrument Serif** (con itálica) | titulares editoriales y números grandes; **una palabra clave por pantalla** en itálica naranja |
+
+### Reglas de estilo
+- Un panel principal con esquinas redondeadas sobre el fondo, sin tarjetas dentro de tarjetas.
+- Sin gradientes decorativos, glassmorphism ni brillos. Los únicos degradados son los *scrims* sobre las miniaturas, para leer el texto.
+- Métricas en línea (números serif + etiqueta), no en "cajitas KPI".
+- Las miniaturas 9:16 son las protagonistas: muestran el subtítulo quemado tal como sale en el video.
+- Las etiquetas de sección en mono mayúscula con tracking (`TUBERÍA`, `NECESITA ATENCIÓN`).
+- Cada miniatura lleva la marca **IA** (regla de etiquetado de contenido).
+
+### Logo
+Cabeza de un martillo viejo (con una esquina gastada, expresada solo en la silueta) con el **triángulo de play recortado** en negativo. Un color (`accent`), sin texturas. Versión elegida: **v3**. La v1 (martillo sobre play, con grietas) y la v2 (se parecía al logo de YouTube) quedan descartadas.
 
 Mejoras respecto de ZAP: más aire, jerarquía clara, un solo acento fuerte, y **miniaturas y video como protagonistas** (es una app de contenido visual).
 
