@@ -12,9 +12,9 @@ Pen.dev se puede usar directamente desde las sesiones de Claude Code (MCP de Pen
 
 Hefesto se expresa con **precisión, no con piedra**: nada de texturas, metal envejecido ni clichés de fragua. Lo "forjado" vive en el lenguaje ("Forjando", "¿Qué forjamos hoy?") y en un único acento incandescente.
 
-**Fuente de verdad:** `design/hefesto.pen` (pen.dev). Pantallas actuales: Hoy (oscuro y claro), Canal (detalle), Producir, Biblioteca (con inspector de escenas y QA) e Ideas y guiones (kanban), más el tablero de componentes (botones, chip de estado, tag, ítem de navegación, tarjeta de kanban) y tres versiones del logo. Vistas previas en `design/previews/`.
+**Fuente de verdad:** `design/hefesto.pen` (pen.dev). Pantallas actuales: Hoy (oscuro y claro), Canal (detalle), Producir, Biblioteca (con inspector de escenas y QA), Ideas y guiones (kanban), Cola (línea de tiempo por carril GPU · Red · CPU + tabla de tareas) y Drive (almacenamiento, dónde está cada video, liberar espacio, subidas), más el tablero de componentes (botones, chip de estado, tag, ítem de navegación, tarjeta de kanban) y tres versiones del logo. Vistas previas en `design/previews/`.
 
-Pendientes: Cola, Calendario, Drive, Costos, Consola, Ajustes; componentes input, tabla y toast.
+Pendientes: Calendario, Costos, Consola, Ajustes; componentes input, tabla y toast.
 
 ### Tokens de color (variables con tema `mode: dark | light`)
 
