@@ -39,13 +39,14 @@ Channel ─┬─< Idea ──< Script ──< Scene
 | brandKitId, voiceProfileId, visualStyleId | fk | |
 | driveFolderId | string? | |
 | aiLabel | bool | marcar contenido IA al publicar |
+| monetized | bool | bloquea proveedores con licencia no comercial (ADR-008) |
 | active | bool | |
 
 ### BrandKit
 Fuente de títulos y subtítulos, colores (primario, resaltado), estilo de subtítulos (preset ASS), watermark (imagen, posición, opacidad), intro y outro opcionales, pack de música (lista de pistas y volumen), plantilla de miniatura.
 
 ### VoiceProfile
-`provider`, `voiceId`, `language`, `stylePrompt` (Gemini TTS: "cálida, pausada, reverente"), `speed`, `pauseBeforeAmenMs` y otros parámetros específicos del proveedor en JSON. Los valores del canal **se aplican encima** de los valores base, como en ZAP.
+`providerConfigId`, `voiceId`, `language`, `stylePrompt` (Gemini TTS: "cálida, pausada, reverente"), `speed`, `pauseBeforeAmenMs` y otros parámetros específicos del proveedor en JSON. Los valores del canal **se aplican encima** de los valores base, como en ZAP.
 
 ### VisualStyle
 `source` (`stock` \| `ai-image` \| `ai-video` \| `mixed`), `basePrompt` (estética), `negativePrompt`, `motion` (`kenburns` \| `parallax` \| `static`), `transition`, `hookSource` (por ejemplo, clip de Veo manual para el hook).
@@ -89,7 +90,13 @@ scripted → voiced → transcribed → visuals_ready → rendered → qa_passed
 `productionId`, `checks[]` (`{name, passed, value, threshold}`), `passed`.
 
 ### CostEntry
-`productionId?`, `channelId`, `provider`, `operation`, `units` (caracteres, tokens, imágenes, segundos), `costUsd`, `createdAt`.
+`productionId?`, `channelId`, `providerConfigId`, `operation`, `units` (caracteres, tokens, imágenes, segundos), `costUsd` (0 si es local), `durationMs`, `createdAt`.
+
+### ProviderConfig
+Instancia configurada de un adaptador (ver [13](13-proveedores-intercambiables.md)): `name` ("Ollama · qwen3 4B"), `adapter` (`openai-compatible` \| `gemini` \| `sidecar` \| `command` \| `manual`…), `capabilities[]`, `baseUrl?`, `model?`, `params` (JSON), `secretRef?` (**nombre** de la variable de `.env`, nunca el valor), `pricingOverride?`, `enabled`, `lastHealth`.
+
+### ProviderBinding
+Qué instancia usa cada canal: `channelId?` (vacío = valor global), `capability`, `role?` (`ideas` \| `script` \| `metadata` \| `keywords`, solo para texto), `providerConfigId`, `params` (se aplican encima de los de la instancia), `fallbackIds[]`.
 
 ### Publication
 `productionId`, `platform`, `accountHandle`, `status` (`draft` \| `scheduled` \| `uploaded_private` \| `published` \| `failed`), `scheduledAt`, `externalId`, `url`, `aiLabeled`.

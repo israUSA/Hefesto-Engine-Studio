@@ -52,6 +52,7 @@ Todo en **TypeScript**. Los procesos pesados locales son binarios (`ffmpeg`, `wh
 | [10 · Roadmap](docs/10-roadmap.md) | Fases, duración y checklists |
 | [11 · Decisiones](docs/11-decisiones.md) | Registro de decisiones de arquitectura (ADR) |
 | [12 · Limitantes y riesgos](docs/12-limitantes-y-riesgos.md) | Lo que puede salir mal y cómo mitigarlo |
+| [13 · Proveedores intercambiables](docs/13-proveedores-intercambiables.md) | Cualquier proveedor, local o en la nube, en cada aspecto |
 
 ## Repositorio
 

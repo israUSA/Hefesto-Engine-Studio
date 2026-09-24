@@ -71,6 +71,8 @@ Sin Redis ni BullMQ (ver [ADR-006](11-decisiones.md)). La cola es una tabla `job
 
 - **Worker GPU** (concurrencia 1): Whisper y render NVENC.
 - **Worker de red** (concurrencia configurable, 2–4): llamadas a Gemini, TTS en la nube, imágenes, Drive.
+
+El carril de cada job lo define el **proveedor** que lo ejecuta, no el tipo de etapa: un TTS local con GPU (Chatterbox) va al worker GPU; uno en la nube, al de red.
 - **Worker CPU** (concurrencia 1–2): tareas de FFmpeg sin GPU, miniaturas, normalización de volumen.
 
 Cada job tiene `status`, `attempts`, `priority`, `payload`, `error` y `startedAt`/`finishedAt`. Pausar deja de tomar jobs nuevos; detener cancela el actual (mata el subproceso); saltar marca el actual como `skipped`.
@@ -79,15 +81,18 @@ Cada job tiene `status`, `attempts`, `priority`, `payload`, `error` y `startedAt
 
 ## Capa de proveedores
 
+Cada aspecto es una **capacidad** con su interfaz: `TextProvider`, `EmbeddingProvider`, `TtsProvider`, `TranscriptionProvider`, `StockMediaProvider`, `ImageProvider`, `VideoProvider`, `MusicProvider`, `StorageProvider`, `PublishTarget` y `Notifier`. Cualquiera puede ser local, en la nube o manual.
+
 ```ts
 interface TtsProvider {
-  id: string;                         // 'gemini-tts', 'google-chirp3', 'elevenlabs'...
+  manifest: ProviderManifest;         // capacidades, carril, VRAM, licencia, secretos, precio
   synthesize(input: TtsInput): Promise<TtsResult>;   // { audioPath, durationMs, costUsd }
   listVoices(lang: string): Promise<Voice[]>;
+  healthCheck(): Promise<HealthResult>;
 }
 ```
 
-Cada canal elige un proveedor y sus parámetros para cada tipo (texto, voz, imagen, video). Si más adelante hay GPU para voz local, se agrega un **sidecar** (por ejemplo Chatterbox en Python con una API HTTP mínima) como otro `TtsProvider`, sin tocar el pipeline.
+Un `ProviderRegistry` resuelve qué instancia usar según el canal, la capacidad y el rol. El carril de la cola sale del manifiesto. Los modelos en Python (por ejemplo Chatterbox) entran como **sidecar** HTTP, sin tocar el pipeline. Detalle completo en [13 · Proveedores intercambiables](13-proveedores-intercambiables.md).
 
 ## Electron
 

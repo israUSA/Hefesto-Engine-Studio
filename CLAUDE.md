@@ -10,7 +10,7 @@ Nx monorepo · Angular (`apps/web`) · NestJS (`apps/api`) · Electron (`apps/de
 
 - **Idioma**: la UI y los docs, en español. El código (identificadores, commits, nombres de archivos de código), en inglés.
 - **Tipos compartidos** en `libs/shared/types`. Un modelo se define una sola vez.
-- **Proveedores**: toda llamada a IA externa pasa por la interfaz de proveedor (`TextProvider`, `TtsProvider`, `ImageProvider`, `VideoProvider`). Nunca se llama a un SDK directo desde una etapa del pipeline.
+- **Proveedores**: todo servicio intercambiable (IA, stock, transcripción, almacenamiento, publicación, avisos), local o en la nube, pasa por la interfaz de su capacidad y declara un `ProviderManifest`. Nunca se llama a un SDK, binario o API directo desde una etapa del pipeline. Ver [13](docs/13-proveedores-intercambiables.md).
 - **Cada llamada con costo** registra un `CostEntry`.
 - **Etapas idempotentes**: cada etapa calcula un hash de sus entradas y se salta si la salida existe con el mismo hash.
 - **Secretos** solo en `.env`, nunca en el repo ni en la base de datos en texto plano.

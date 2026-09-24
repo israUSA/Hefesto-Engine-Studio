@@ -30,7 +30,8 @@ Objetivo: **un comando que produce un short completo** para un canal.
 - [ ] Nx monorepo con `apps/api` y `libs/shared/types`
 - [ ] SQLite + Drizzle: Channel, Script, Scene, Production, Asset, CostEntry, BibleVerse
 - [ ] Importar la RV1909 y crear el módulo `bible`
-- [ ] Proveedores: `GeminiTextProvider`, `GeminiTtsProvider`, `PexelsProvider`
+- [ ] Capa de proveedores (ver [13](13-proveedores-intercambiables.md)): manifiesto, `ProviderRegistry`, pruebas de contrato y proveedor `fake`
+- [ ] Adaptadores: Gemini (texto y TTS), OpenAI-compatible (Ollama y otros), Pexels, whisper.cpp como comando, almacenamiento en carpeta local
 - [ ] Etapas: guion (JSON estructurado) → voz → whisper.cpp → `subs.ass` → escenas stock → render FFmpeg NVENC
 - [ ] Script `fetch-binaries` (ffmpeg, whisper.cpp CUDA, modelo)
 - [ ] Idempotencia por `inputHash`

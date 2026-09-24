@@ -19,6 +19,10 @@ Para automatizar:
 | Gemini Flash (API) | ideas, guiones en volumen, metadatos | < $0.005 / guion |
 | Gemini Pro (API) | guiones importantes o series | ~$0.01–0.03 / guion |
 | Embeddings de Gemini | detectar temas repetidos | despreciable |
+| Ollama / LM Studio (local, 3–4 B cuantizado) | plan B sin internet, ideas | $0 · más lento, peor JSON y español |
+| OpenAI, Claude, DeepSeek, OpenRouter | alternativas en la nube | según el modelo |
+
+Cualquier aspecto puede usar otro proveedor, local o en la nube: ver [13 · Proveedores intercambiables](13-proveedores-intercambiables.md).
 
 ## Voz (TTS)
 

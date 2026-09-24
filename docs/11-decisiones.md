@@ -50,3 +50,8 @@ Formato: contexto → decisión → consecuencias. Las decisiones se reemplazan 
 ### ADR-010 · Publicación por fases
 **Contexto:** las APIs de YouTube y TikTok restringen a privado las apps sin auditar.
 **Decisión:** exportar → semi-automático (borrador o privado) → automático tras las auditorías.
+
+### ADR-011 · Proveedores intercambiables por capacidad
+**Contexto:** se quiere poder usar cualquier proveedor, local o en la nube, en cada aspecto (texto, voz, transcripción, imágenes, video, música, almacenamiento, publicación, avisos). Los precios, modelos y licencias cambian seguido.
+**Decisión:** cada aspecto es una capacidad con su interfaz. Los proveedores declaran un manifiesto (capacidades, carril, VRAM, licencia, secretos, precio) y se configuran como instancias asignables por canal y rol, con respaldos. Se priorizan adaptadores genéricos (OpenAI-compatible, fal/Replicate, ComfyUI, sidecar HTTP, comando, manual). Complementa ADR-005: Python se admite **solo como sidecar externo**, nunca en el núcleo.
+**Consecuencias:** sumar un proveedor suele ser configuración; la cola asigna el carril según el proveedor; las licencias se aplican en la cola. Las capacidades distintas obligan a que la UI se adapte al manifiesto. Detalle en [13](13-proveedores-intercambiables.md).
