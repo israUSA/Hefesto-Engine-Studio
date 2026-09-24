@@ -23,7 +23,7 @@ Estimaciones para un desarrollador con asistencia de IA, a ritmo constante de me
 - [ ] Probar voces de Gemini TTS en español y elegir 2–3 para oraciones
 - [ ] Conseguir y validar la RV1909 en formato estructurado
 - [ ] Definir los 2–3 primeros canales (nombre, plataforma, nicho, "biblia del canal")
-- [ ] pen.dev: tokens, componentes base y pantallas Hoy, Canales, Producir y Biblioteca
+- [x] pen.dev: tokens, componentes base y 12 pantallas (ver `design/previews/`)
 
 ## Fase 1 · Pipeline MVP (sin UI)
 Objetivo: **un comando que produce un short completo** para un canal.
