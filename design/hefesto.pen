@@ -23250,7 +23250,8 @@
                                   "fill": "$text-2",
                                   "content": "En cola · 1",
                                   "fontFamily": "$font-ui",
-                                  "fontSize": 12.5
+                                  "fontSize": 12.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -23453,7 +23454,8 @@
                                   "fill": "$text-2",
                                   "content": "En cola · 2",
                                   "fontFamily": "$font-ui",
-                                  "fontSize": 12.5
+                                  "fontSize": 12.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -23656,7 +23658,8 @@
                                   "fill": "$text-2",
                                   "content": "En cola · 3",
                                   "fontFamily": "$font-ui",
-                                  "fontSize": 12.5
+                                  "fontSize": 12.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -23857,7 +23860,8 @@
                                   "fill": "$text",
                                   "content": "Hecho",
                                   "fontFamily": "$font-ui",
-                                  "fontSize": 12.5
+                                  "fontSize": 12.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -36710,7 +36714,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -36818,7 +36823,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -36926,7 +36932,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -37034,7 +37041,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -37251,7 +37259,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -37468,7 +37477,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -37576,7 +37586,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -37793,7 +37804,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -37901,7 +37913,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38009,7 +38022,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38117,7 +38131,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38225,7 +38240,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38333,7 +38349,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38441,7 +38458,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38549,7 +38567,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38766,7 +38785,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38874,7 +38894,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -38982,7 +39003,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -39090,7 +39112,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -39198,7 +39221,8 @@
                                   "fill": "$text-3",
                                   "content": "INFO",
                                   "fontFamily": "$font-mono",
-                                  "fontSize": 10.5
+                                  "fontSize": 10.5,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -40678,8 +40702,10 @@
                               "type": "frame",
                               "id": "hBuCU",
                               "name": "H1",
+                              "width": "fill_container",
                               "gap": 10,
-                              "alignItems": "end",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
                               "children": [
                                 {
                                   "type": "text",
@@ -40692,6 +40718,20 @@
                                   "fontSize": 34,
                                   "fontWeight": "normal",
                                   "fontStyle": "italic"
+                                },
+                                {
+                                  "id": "CdwTC",
+                                  "type": "ref",
+                                  "ref": "I0SNgZ",
+                                  "name": "Add Provider",
+                                  "descendants": {
+                                    "TXNlc": {
+                                      "icon": "plus"
+                                    },
+                                    "j7EXVH": {
+                                      "content": "Agregar proveedor"
+                                    }
+                                  }
                                 }
                               ]
                             },
@@ -40702,7 +40742,7 @@
                               "fill": "$text-3",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "Cada tipo de tarea usa un proveedor intercambiable. Las claves se leen de .env y nunca se guardan en la base de datos.",
+                              "content": "Cada aspecto usa un proveedor intercambiable: en la nube, local o manual. Las claves se leen de .env y nunca se guardan en la base de datos.",
                               "fontFamily": "$font-ui",
                               "fontSize": 13,
                               "fontWeight": "normal"
@@ -40785,7 +40825,7 @@
                                           "id": "cj5Tz",
                                           "name": "S",
                                           "fill": "$text-3",
-                                          "content": "ideas y guiones",
+                                          "content": "nube · 3 roles",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 11.5,
                                           "fontWeight": "normal"
@@ -40875,7 +40915,7 @@
                                       "fill": "$text-2",
                                       "textGrowth": "fixed-width",
                                       "width": "fill_container",
-                                      "content": "Conectado · nivel gratuito · 1.240 req hoy",
+                                      "content": "Conectado · respaldo: Ollama qwen3 4B (local)",
                                       "fontFamily": "$font-ui",
                                       "fontSize": 12,
                                       "fontWeight": "normal"
@@ -40967,7 +41007,7 @@
                                           "id": "nttxH",
                                           "name": "S",
                                           "fill": "$text-3",
-                                          "content": "TTS",
+                                          "content": "nube · sin respaldo",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 11.5,
                                           "fontWeight": "normal"
@@ -41139,7 +41179,7 @@
                                           "id": "TiUsL",
                                           "name": "T",
                                           "fill": "$text",
-                                          "content": "Imágenes",
+                                          "content": "Imágenes IA",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 13,
                                           "fontWeight": "600"
@@ -41149,7 +41189,7 @@
                                           "id": "Cl0cs",
                                           "name": "S",
                                           "fill": "$text-3",
-                                          "content": "IA + stock",
+                                          "content": "nube · red",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 11.5,
                                           "fontWeight": "normal"
@@ -41180,7 +41220,7 @@
                                       "fill": "$text",
                                       "textGrowth": "fixed-width",
                                       "width": "fill_container",
-                                      "content": "Gemini + Pexels",
+                                      "content": "Gemini Imagen",
                                       "fontFamily": "$font-ui",
                                       "fontSize": 12.5,
                                       "fontWeight": "normal"
@@ -41208,7 +41248,7 @@
                                       "icon": "key-round"
                                     },
                                     "SFc0z": {
-                                      "content": "5634••••••c1f0",
+                                      "content": "AIza••••••••••••3kQ",
                                       "fill": "$text"
                                     },
                                     "ryC1N": {
@@ -41239,7 +41279,7 @@
                                       "fill": "$text-2",
                                       "textGrowth": "fixed-width",
                                       "width": "fill_container",
-                                      "content": "Conectado · 212 descargas este mes",
+                                      "content": "Conectado · 84 imágenes este mes",
                                       "fontFamily": "$font-ui",
                                       "fontSize": 12,
                                       "fontWeight": "normal"
@@ -41248,6 +41288,188 @@
                                 },
                                 {
                                   "id": "DuVv7",
+                                  "type": "ref",
+                                  "ref": "I0SNgZ",
+                                  "name": "Btn",
+                                  "descendants": {
+                                    "TXNlc": {
+                                      "icon": "zap"
+                                    },
+                                    "j7EXVH": {
+                                      "content": "Probar"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "H7gUU",
+                              "name": "P Stock",
+                              "width": "fill_container",
+                              "stroke": "$line",
+                              "strokeWidth": {
+                                "bottom": 1
+                              },
+                              "gap": 18,
+                              "padding": [
+                                14,
+                                0
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "e8F63",
+                                  "name": "Kind",
+                                  "width": 150,
+                                  "gap": 12,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "QY93I",
+                                      "name": "Ico",
+                                      "width": 32,
+                                      "height": 32,
+                                      "fill": "$surface-2",
+                                      "cornerRadius": 8,
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "icon",
+                                          "id": "C7f4Zt",
+                                          "name": "I",
+                                          "width": 15,
+                                          "height": 15,
+                                          "icon": "images",
+                                          "library": "lucide",
+                                          "fill": "$text-2"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "N5Xhun",
+                                      "name": "T",
+                                      "layout": "vertical",
+                                      "gap": 2,
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "xdrqY",
+                                          "name": "T",
+                                          "fill": "$text",
+                                          "content": "Stock",
+                                          "fontFamily": "$font-ui",
+                                          "fontSize": 13,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "l3Jadx",
+                                          "name": "S",
+                                          "fill": "$text-3",
+                                          "content": "nube · gratis",
+                                          "fontFamily": "$font-ui",
+                                          "fontSize": 11.5,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "ZkpYs",
+                                  "name": "Select",
+                                  "width": 175,
+                                  "cornerRadius": 8,
+                                  "stroke": "$line-strong",
+                                  "strokeWidth": 1,
+                                  "gap": 8,
+                                  "padding": [
+                                    9,
+                                    11
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "EL9CL",
+                                      "name": "T",
+                                      "fill": "$text",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Pexels",
+                                      "fontFamily": "$font-ui",
+                                      "fontSize": 12.5,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "icon",
+                                      "id": "UKJ7a",
+                                      "name": "C",
+                                      "width": 13,
+                                      "height": 13,
+                                      "icon": "chevron-down",
+                                      "library": "lucide",
+                                      "fill": "$text-3"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "GDnUz",
+                                  "type": "ref",
+                                  "ref": "G6XHoO",
+                                  "name": "Key",
+                                  "width": 215,
+                                  "descendants": {
+                                    "Vn4He": {
+                                      "icon": "key-round"
+                                    },
+                                    "SFc0z": {
+                                      "content": "5634••••••c1f0",
+                                      "fill": "$text"
+                                    },
+                                    "ryC1N": {
+                                      "content": ".env"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "OFhGz",
+                                  "name": "Status",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "pOR7o",
+                                      "name": "D",
+                                      "fill": "$ok",
+                                      "width": 7,
+                                      "height": 7
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "vxqb8",
+                                      "name": "T",
+                                      "fill": "$text-2",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Conectado · respaldo: Pixabay · 212 descargas",
+                                      "fontFamily": "$font-ui",
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "dGFE9",
                                   "type": "ref",
                                   "ref": "I0SNgZ",
                                   "name": "Btn",
@@ -41330,8 +41552,8 @@
                                           "type": "text",
                                           "id": "R6otc",
                                           "name": "S",
-                                          "fill": "$text-3",
-                                          "content": "hooks",
+                                          "fill": "$warn",
+                                          "content": "manual · hooks",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 11.5,
                                           "fontWeight": "normal"
@@ -41503,7 +41725,7 @@
                                           "id": "CUNos",
                                           "name": "T",
                                           "fill": "$text",
-                                          "content": "Subtítulos",
+                                          "content": "Transcripción",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 13,
                                           "fontWeight": "600"
@@ -41512,7 +41734,7 @@
                                           "type": "text",
                                           "id": "YqlDP",
                                           "name": "S",
-                                          "fill": "$text-3",
+                                          "fill": "$steel",
                                           "content": "local · GPU",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 11.5,
@@ -41572,7 +41794,7 @@
                                       "icon": "settings-2"
                                     },
                                     "SFc0z": {
-                                      "content": "large-v3-turbo · q5",
+                                      "content": "large-v3-turbo q5",
                                       "fill": "$text"
                                     },
                                     "ryC1N": {
@@ -41694,7 +41916,7 @@
                                           "type": "text",
                                           "id": "U7rslF",
                                           "name": "S",
-                                          "fill": "$text-3",
+                                          "fill": "$steel",
                                           "content": "local · GPU",
                                           "fontFamily": "$font-ui",
                                           "fontSize": 11.5,
@@ -41794,6 +42016,188 @@
                                 },
                                 {
                                   "id": "FlEL8",
+                                  "type": "ref",
+                                  "ref": "I0SNgZ",
+                                  "name": "Btn",
+                                  "descendants": {
+                                    "TXNlc": {
+                                      "icon": "zap"
+                                    },
+                                    "j7EXVH": {
+                                      "content": "Probar"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "z4Bzf",
+                              "name": "P Almacenamiento",
+                              "width": "fill_container",
+                              "stroke": "$line",
+                              "strokeWidth": {
+                                "bottom": 1
+                              },
+                              "gap": 18,
+                              "padding": [
+                                14,
+                                0
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "uj6YZ",
+                                  "name": "Kind",
+                                  "width": 150,
+                                  "gap": 12,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "m9Enw2",
+                                      "name": "Ico",
+                                      "width": 32,
+                                      "height": 32,
+                                      "fill": "$surface-2",
+                                      "cornerRadius": 8,
+                                      "justifyContent": "center",
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "icon",
+                                          "id": "FRwwX",
+                                          "name": "I",
+                                          "width": 15,
+                                          "height": 15,
+                                          "icon": "hard-drive",
+                                          "library": "lucide",
+                                          "fill": "$text-2"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "T0ws3V",
+                                      "name": "T",
+                                      "layout": "vertical",
+                                      "gap": 2,
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "glHKD",
+                                          "name": "T",
+                                          "fill": "$text",
+                                          "content": "Almacenamiento",
+                                          "fontFamily": "$font-ui",
+                                          "fontSize": 13,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "n0aru",
+                                          "name": "S",
+                                          "fill": "$text-3",
+                                          "content": "nube · red",
+                                          "fontFamily": "$font-ui",
+                                          "fontSize": 11.5,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "LzsNC",
+                                  "name": "Select",
+                                  "width": 175,
+                                  "cornerRadius": 8,
+                                  "stroke": "$line-strong",
+                                  "strokeWidth": 1,
+                                  "gap": 8,
+                                  "padding": [
+                                    9,
+                                    11
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "E0Ebd4",
+                                      "name": "T",
+                                      "fill": "$text",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Google Drive",
+                                      "fontFamily": "$font-ui",
+                                      "fontSize": 12.5,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "icon",
+                                      "id": "a0DdXI",
+                                      "name": "C",
+                                      "width": 13,
+                                      "height": 13,
+                                      "icon": "chevron-down",
+                                      "library": "lucide",
+                                      "fill": "$text-3"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "KyIIn",
+                                  "type": "ref",
+                                  "ref": "G6XHoO",
+                                  "name": "Key",
+                                  "width": 215,
+                                  "descendants": {
+                                    "Vn4He": {
+                                      "icon": "shield-check"
+                                    },
+                                    "SFc0z": {
+                                      "content": "OAuth · drive.file",
+                                      "fill": "$text"
+                                    },
+                                    "ryC1N": {
+                                      "content": ".env"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "mUJlf",
+                                  "name": "Status",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "DoWeF",
+                                      "name": "D",
+                                      "fill": "$ok",
+                                      "width": 7,
+                                      "height": 7
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "AsC3m",
+                                      "name": "T",
+                                      "fill": "$text-2",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "Conectado · 318 GB de 2 TB · respaldo: carpeta local",
+                                      "fontFamily": "$font-ui",
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "AJhKu",
                                   "type": "ref",
                                   "ref": "I0SNgZ",
                                   "name": "Btn",
