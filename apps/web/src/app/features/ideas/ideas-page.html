@@ -1,0 +1,116 @@
+<div class="hf-ideas">
+  <header class="hf-ideas__head">
+    <div>
+      <h2 class="hf-ideas__title">Ideas y <em>guiones</em></h2>
+      <p class="hf-ideas__hint">Solo lo aprobado entra a la cola de producción.</p>
+    </div>
+    @if (!hasNoChannels()) {
+      <div class="hf-ideas__actions">
+        <hf-select class="hf-ideas__filter" [options]="channelOptions()" [ngModel]="channelFilter()" (ngModelChange)="channelFilter.set($event); onFilterChange()" ariaLabel="Filtrar por canal" />
+        <hf-button variant="secondary" routerLink="/producir">
+          <hf-icon name="play" [size]="13" />
+          Producir aprobados
+        </hf-button>
+        <hf-button variant="primary" (pressed)="generateOpen.set(true)">
+          <hf-icon name="sparkles" [size]="13" />
+          Generar ideas
+        </hf-button>
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="hf-ideas__columns">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <hf-skeleton height="320px" />
+      }
+    </div>
+  } @else if (loadError()) {
+    <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+      <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
+    </hf-empty-state>
+  } @else if (hasNoChannels()) {
+    <hf-empty-state icon="users" title="Todavía no hay canales" detail="Creá tu primer canal para empezar a generar ideas y guiones.">
+      <hf-button variant="primary" [routerLink]="['/canales']" [queryParams]="{ nuevo: '1' }">
+        <hf-icon name="plus" [size]="14" />
+        Crear canal
+      </hf-button>
+    </hf-empty-state>
+  } @else if (board(); as b) {
+    <div class="hf-ideas__columns">
+      @for (column of b.columns; track column.id) {
+        <section class="hf-column">
+          <header class="hf-column__head">
+            <span>{{ column.label }}</span>
+            <span class="hf-column__count">{{ column.cards.length }}</span>
+          </header>
+
+          <div class="hf-column__body">
+            @if (column.cards.length === 0) {
+              <p class="hf-column__empty">Nada acá todavía.</p>
+            }
+            @for (card of column.cards; track card.id) {
+              <article class="hf-card">
+                @if (card.thumbUrl) {
+                  <img class="hf-card__thumb" [src]="card.thumbUrl" alt="" loading="lazy" />
+                }
+                <div class="hf-card__top">
+                  <span class="hf-card__channel">{{ channelName(card.channelId) }}</span>
+                  @if (overrideOf(card.id); as ov) {
+                    <hf-tag [tone]="ov === 'accepted' ? 'accent' : 'neutral'">{{ ov === 'accepted' ? 'aceptada' : 'rechazada' }}</hf-tag>
+                  }
+                </div>
+                <h3 class="hf-card__title">{{ card.title }}</h3>
+                @if (card.subtitle) {
+                  <p class="hf-card__subtitle">{{ card.subtitle }}</p>
+                }
+                <div class="hf-card__meta">
+                  @if (card.verseRef) {
+                    <hf-tag tone="accent">{{ card.verseRef }}</hf-tag>
+                  }
+                  @if (card.durationSec) {
+                    <span class="hf-card__duration">{{ card.durationSec }}s</span>
+                  }
+                </div>
+
+                @if (card.kind === 'idea') {
+                  <div class="hf-card__actions">
+                    <hf-button variant="ghost" [disabled]="isBusy(card.id)" (pressed)="acceptIdea(card)">
+                      <hf-icon name="check" [size]="13" />
+                      Aceptar
+                    </hf-button>
+                    <hf-button variant="ghost" [disabled]="isBusy(card.id)" (pressed)="rejectIdea(card)">
+                      <hf-icon name="close" [size]="13" />
+                      Rechazar
+                    </hf-button>
+                    <hf-button variant="secondary" [loading]="isBusy(card.id)" (pressed)="writeScript(card)">
+                      <hf-icon name="edit" [size]="13" />
+                      Escribir guion
+                    </hf-button>
+                  </div>
+                } @else if (card.kind === 'script') {
+                  <div class="hf-card__actions">
+                    <hf-button variant="secondary" (pressed)="openScript(card)">Abrir</hf-button>
+                  </div>
+                } @else {
+                  <div class="hf-card__actions">
+                    <a class="hf-card__link" [routerLink]="['/biblioteca']" [queryParams]="{ open: card.id }">
+                      Ver en Biblioteca
+                      <hf-icon name="arrow-right" [size]="12" />
+                    </a>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
+
+<hf-generate-ideas-dialog [open]="generateOpen()" [channels]="channels()" (closed)="closeGenerateDialog()" (created)="onIdeasGenerated()" />
+
+@if (openScriptId(); as id) {
+  <hf-script-drawer [scriptId]="id" (closed)="closeScript()" (updated)="onScriptUpdated()" />
+}

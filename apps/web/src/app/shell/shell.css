@@ -1,0 +1,43 @@
+.hf-app {
+  display: flex;
+  height: 100vh;
+  min-height: 640px;
+  background: var(--bg);
+  padding: var(--space-4);
+  gap: var(--space-4);
+}
+
+.hf-app__sidebar {
+  flex: none;
+  width: 232px;
+}
+
+.hf-app__panel {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.hf-app__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+.hf-app__banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-6);
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--line);
+}

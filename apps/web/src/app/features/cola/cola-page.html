@@ -1,0 +1,119 @@
+<div class="hf-cola">
+  <header class="hf-cola__head">
+    <div>
+      <h1 class="hf-cola__title">
+        Cola
+        @if (queue()) {
+          <span class="hf-cola__title-sep">·</span>
+          <em>termina a las {{ finishClock() }}</em>
+        }
+      </h1>
+      @if (queue()) {
+        <p class="hf-cola__subline">
+          {{ totalTasks() }} tarea{{ totalTasks() === 1 ? '' : 's' }} · {{ runningCount() }} corriendo
+          @if (failedCount() > 0) {
+            · {{ failedCount() }} con error
+          }
+          · ETA estimado según el historial de tareas
+        </p>
+      }
+    </div>
+    <div class="hf-cola__actions">
+      @if (failedCount() > 0) {
+        <hf-button variant="secondary" [loading]="retryingAll()" (pressed)="retryAllFailed()">
+          <hf-icon name="refresh" [size]="13" />
+          Reintentar fallidos · {{ failedCount() }}
+        </hf-button>
+      }
+      <hf-button variant="secondary" [loading]="pausing()" (pressed)="togglePause()">
+        <hf-icon [name]="queue()?.paused ? 'play' : 'pause'" [size]="13" />
+        {{ queue()?.paused ? 'Reanudar la cola' : 'Pausar la cola' }}
+      </hf-button>
+    </div>
+  </header>
+
+  @if (!connected()) {
+    <div class="hf-cola__disconnected">
+      <hf-icon name="wifi-off" [size]="13" />
+      Sin conexión en vivo con el motor. Mostrando el último estado conocido.
+    </div>
+  }
+
+  @if (loading()) {
+    <hf-skeleton height="220px" />
+    <hf-skeleton height="320px" />
+  } @else if (loadError()) {
+    <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+      <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
+    </hf-empty-state>
+  } @else {
+    <hf-queue-timeline [rows]="laneRows()" />
+
+    @if (tableRows().length === 0) {
+      <hf-empty-state icon="zap" title="No hay tareas en la cola" detail="Andá a Producir para armar una nueva tanda." />
+    } @else {
+      <div class="hf-table">
+        <div class="hf-table__row hf-table__row--head">
+          <span>Estado</span>
+          <span>Tarea</span>
+          <span>Canal</span>
+          <span>Carril</span>
+          <span>Progreso</span>
+          <span>Intentos</span>
+          <span>Tiempo</span>
+          <span></span>
+        </div>
+        @for (row of tableRows(); track row.job.id) {
+          <div class="hf-table__row" [class.hf-table__row--error]="row.isFailed">
+            <span>
+              <hf-status-chip [tone]="row.statusTone" [pulse]="row.isRunning">{{ row.statusLabel }}</hf-status-chip>
+            </span>
+            <span class="hf-table__cell-title">
+              <span class="hf-table__stage">{{ stageLabel(row.job.type) }}</span>
+              @if (row.job.title) {
+                <span class="hf-table__video">{{ row.job.title }}</span>
+              }
+              @if (row.job.error) {
+                <span class="hf-table__error">{{ row.job.error }}</span>
+              }
+            </span>
+            <span class="hf-table__channel">{{ row.job.channelName || '—' }}</span>
+            <span class="hf-table__lane">{{ laneLabel(row.job.lane) }}</span>
+            <span class="hf-table__progress">
+              @if (row.isRunning) {
+                <span class="hf-progress-mini"><span class="hf-progress-mini__fill" [style.width.%]="row.job.progress <= 1 ? row.job.progress * 100 : row.job.progress"></span></span>
+              } @else {
+                <span class="hf-table__dash">—</span>
+              }
+            </span>
+            <span class="hf-table__attempts">{{ row.job.attempts }}/{{ row.job.maxAttempts }}</span>
+            <span class="hf-table__duration">{{ row.durationText }}</span>
+            <span class="hf-table__row-actions">
+              @if (row.isQueued) {
+                <hf-button variant="icon" [disabled]="isBusy(row.job.id)" (pressed)="bumpPriority(row.job, 1)" aria-label="Subir prioridad">
+                  <hf-icon name="chevron-down" [size]="12" class="hf-icon-flip" />
+                </hf-button>
+                <hf-button variant="icon" [disabled]="isBusy(row.job.id)" (pressed)="bumpPriority(row.job, -1)" aria-label="Bajar prioridad">
+                  <hf-icon name="chevron-down" [size]="12" />
+                </hf-button>
+                <hf-button variant="icon" [disabled]="isBusy(row.job.id)" (pressed)="skip(row.job)" aria-label="Saltar">
+                  <hf-icon name="skip" [size]="12" />
+                </hf-button>
+              }
+              @if (row.isQueued || row.isRunning) {
+                <hf-button variant="icon" [disabled]="isBusy(row.job.id)" (pressed)="cancel(row.job)" aria-label="Cancelar">
+                  <hf-icon name="stop" [size]="12" />
+                </hf-button>
+              }
+              @if (row.isFailed) {
+                <hf-button variant="icon" [disabled]="isBusy(row.job.id)" (pressed)="retry(row.job)" aria-label="Reintentar">
+                  <hf-icon name="refresh" [size]="12" />
+                </hf-button>
+              }
+            </span>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

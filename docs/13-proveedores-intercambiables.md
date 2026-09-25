@@ -57,7 +57,7 @@ interface ProviderManifest {
   kind: 'cloud' | 'local' | 'manual';
   resources: { lane: 'gpu' | 'net' | 'cpu'; vramMb?: number };
   license: { name: string; commercial: boolean; url?: string };
-  secrets: string[];                  // nombres de variables de .env, nunca valores
+  secrets: string[];                  // nombres de claves en la bóveda, nunca valores
   features: {                         // qué sabe hacer, para que la UI se adapte
     jsonSchema?: boolean; stylePrompt?: boolean; voiceCloning?: boolean;
     wordTimestamps?: boolean; languages?: string[]; maxInputChars?: number;
@@ -68,7 +68,7 @@ interface ProviderManifest {
 ```
 
 ### 2. Instancias configurables (`ProviderConfig`)
-Un mismo adaptador puede tener varias instancias: "Ollama · qwen3 4B" y "OpenRouter · Claude" usan el mismo adaptador OpenAI-compatible con otro `baseUrl` y otro `model`. La configuración va en la base de datos; la **clave** va en `.env` y la base guarda solo el nombre de la variable (`secretRef`).
+Un mismo adaptador puede tener varias instancias: "Ollama · qwen3 4B" y "OpenRouter · Claude" usan el mismo adaptador OpenAI-compatible con otro `baseUrl` y otro `model`. La configuración va en la base de datos. La **clave** la pega el usuario en Ajustes y se guarda cifrada con Windows DPAPI (ADR-012); la base guarda solo su nombre (`secretRef`).
 
 ### 3. Asignación por canal y por rol
 Cada canal elige una instancia **por aspecto**, heredando los valores globales, con **roles** dentro de texto: `ideas` (barato), `script` (el mejor), `metadata`, `keywords`. Cada asignación tiene su lista de **respaldos** (fallback).

@@ -1,0 +1,225 @@
+<div class="hf-producir">
+  <div class="hf-producir__main">
+    <header class="hf-producir__head">
+      <span class="hf-producir__eyebrow">NUEVA TANDA</span>
+      <h1 class="hf-producir__title">¿Qué forjamos <em>hoy</em>?</h1>
+    </header>
+
+    <section class="hf-step">
+      <div class="hf-step__head">
+        <span class="hf-step__num">01</span>
+        <h2 class="hf-step__title">Canales</h2>
+        <span class="hf-step__hint">{{ selectedCount() }} de {{ channels().length }} seleccionados</span>
+      </div>
+
+      @if (loadingChannels()) {
+        <div class="hf-channel-grid">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <hf-skeleton height="92px" />
+          }
+        </div>
+      } @else if (channelsError()) {
+        <hf-empty-state icon="wifi-off" [title]="channelsError()!" detail="Verificá que el motor esté corriendo.">
+          <hf-button variant="secondary" (pressed)="loadChannels()">Reintentar</hf-button>
+        </hf-empty-state>
+      } @else if (channels().length === 0) {
+        <hf-empty-state icon="users" title="Todavía no hay canales" detail="Creá un canal para poder producir.">
+          <hf-button variant="primary" [routerLink]="['/canales']">Ir a Canales</hf-button>
+        </hf-empty-state>
+      } @else {
+        <div class="hf-channel-grid">
+          @for (vm of channelVms(); track vm.summary.channel.id) {
+            <button
+              type="button"
+              class="hf-channel-card"
+              [class.hf-channel-card--selected]="selectedIds().has(vm.summary.channel.id)"
+              role="checkbox"
+              [attr.aria-checked]="selectedIds().has(vm.summary.channel.id)"
+              (click)="toggleChannel(vm.summary.channel.id)"
+            >
+              <div class="hf-channel-card__head">
+                <span class="hf-channel-card__avatar" [class]="'hf-channel-card__avatar--' + vm.tone">{{ vm.initial }}</span>
+                <span class="hf-channel-card__check" [class.hf-channel-card__check--on]="selectedIds().has(vm.summary.channel.id)">
+                  @if (selectedIds().has(vm.summary.channel.id)) {
+                    <hf-icon name="check" [size]="12" />
+                  }
+                </span>
+              </div>
+              <div class="hf-channel-card__name">{{ vm.summary.channel.name }}</div>
+              <div class="hf-channel-card__topic">{{ vm.summary.channel.topic }}</div>
+              <div class="hf-channel-card__meta">{{ vm.approvedCount }} aprobados</div>
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="hf-step">
+      <div class="hf-step__head">
+        <span class="hf-step__num">02</span>
+        <h2 class="hf-step__title">Qué producir</h2>
+      </div>
+
+      <div class="hf-mode-toggle" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          class="hf-mode-toggle__btn"
+          [class.hf-mode-toggle__btn--active]="mode() === 'approved'"
+          [attr.aria-selected]="mode() === 'approved'"
+          (click)="setMode('approved')"
+        >
+          Guiones aprobados
+          <span class="hf-mode-toggle__count">{{ approvedCardsForSelected().length }}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="hf-mode-toggle__btn"
+          [class.hf-mode-toggle__btn--active]="mode() === 'new'"
+          [attr.aria-selected]="mode() === 'new'"
+          (click)="setMode('new')"
+        >
+          Generar guiones nuevos
+        </button>
+      </div>
+
+      @if (mode() === 'new') {
+        <div class="hf-new-mode">
+          <div class="hf-stepper">
+            <span class="hf-stepper__label">Videos por canal</span>
+            <div class="hf-stepper__control">
+              <hf-button variant="icon" [disabled]="countPerChannel() <= 1" (pressed)="countPerChannel.set(countPerChannel() - 1)" aria-label="Menos videos">
+                −
+              </hf-button>
+              <span class="hf-stepper__value">{{ countPerChannel() }}</span>
+              <hf-button variant="icon" [disabled]="countPerChannel() >= 20" (pressed)="countPerChannel.set(countPerChannel() + 1)" aria-label="Más videos">
+                <hf-icon name="plus" [size]="13" />
+              </hf-button>
+            </div>
+          </div>
+          <hf-input icon="edit" placeholder="Tema (opcional), ej: Salmos de gratitud" [ngModel]="topic()" (ngModelChange)="topic.set($event)" />
+        </div>
+      } @else {
+        @if (selectedCount() === 0) {
+          <hf-empty-state icon="users" title="Elegí un canal primero" detail="Seleccioná al menos un canal para ver sus guiones aprobados." />
+        } @else if (approvedCardsForSelected().length === 0) {
+          <hf-empty-state icon="sparkles" title="No hay guiones aprobados" detail="Aprobá guiones en Ideas y guiones o generá nuevos.">
+            <hf-button variant="secondary" [routerLink]="['/ideas-y-guiones']">Ir a Ideas y guiones</hf-button>
+          </hf-empty-state>
+        } @else {
+          <div class="hf-scripts">
+            <div class="hf-scripts__toolbar">
+              <span>{{ selectedScriptIds().size }} de {{ approvedCardsForSelected().length }} elegidos</span>
+              <div class="hf-scripts__toolbar-actions">
+                <button type="button" class="hf-link-btn" (click)="selectAllApproved()">Todos</button>
+                <button type="button" class="hf-link-btn" (click)="clearApproved()">Ninguno</button>
+              </div>
+            </div>
+            <div class="hf-scripts__list">
+              @for (card of approvedCardsForSelected(); track card.id) {
+                <label class="hf-script-row">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedScriptIds().has(card.id)"
+                    (change)="toggleScript(card.id)"
+                  />
+                  <span class="hf-script-row__title">{{ card.title }}</span>
+                  @if (card.verseRef) {
+                    <span class="hf-script-row__verse">{{ card.verseRef }}</span>
+                  }
+                  @if (card.durationSec) {
+                    <span class="hf-script-row__duration">{{ card.durationSec }}s</span>
+                  }
+                </label>
+              }
+            </div>
+          </div>
+        }
+      }
+    </section>
+
+    <section class="hf-step">
+      <div class="hf-step__head">
+        <span class="hf-step__num">03</span>
+        <h2 class="hf-step__title">Prioridad</h2>
+      </div>
+      <div class="hf-priority" role="radiogroup">
+        <button type="button" role="radio" [attr.aria-checked]="priority() === -1" class="hf-priority__btn" [class.hf-priority__btn--active]="priority() === -1" (click)="setPriority(-1)">Baja</button>
+        <button type="button" role="radio" [attr.aria-checked]="priority() === 0" class="hf-priority__btn" [class.hf-priority__btn--active]="priority() === 0" (click)="setPriority(0)">Normal</button>
+        <button type="button" role="radio" [attr.aria-checked]="priority() === 1" class="hf-priority__btn" [class.hf-priority__btn--active]="priority() === 1" (click)="setPriority(1)">Alta</button>
+      </div>
+    </section>
+  </div>
+
+  <aside class="hf-summary">
+    <span class="hf-summary__eyebrow">RESUMEN DE LA TANDA</span>
+
+    @if (selectedCount() === 0) {
+      <hf-empty-state icon="lightbulb" title="Elegí al menos un canal" detail="El resumen aparece acá apenas armes la tanda." />
+    } @else if (estimating() && !estimate()) {
+      <div class="hf-summary__loading">
+        <hf-skeleton height="64px" />
+        <hf-skeleton height="18px" />
+        <hf-skeleton height="80px" />
+      </div>
+    } @else if (estimateError()) {
+      <hf-empty-state icon="wifi-off" title="No se pudo calcular el resumen" detail="Probá de nuevo en unos segundos." />
+    } @else if (estimate(); as est) {
+      <div class="hf-summary__body" [class.hf-summary__body--busy]="estimating()">
+        <div class="hf-summary__hero">
+          <span class="hf-summary__hero-num">{{ est.videos }}</span>
+          <span class="hf-summary__hero-word">videos</span>
+        </div>
+        <div class="hf-summary__line">
+          ≈ {{ etaText() }} · ≈ {{ '$' + est.costUsd.toFixed(2) }} · termina {{ finishClock() }}
+        </div>
+
+        @if (laneShares().length > 0) {
+          <div class="hf-lane-bar">
+            @for (share of laneShares(); track share.lane) {
+              <span class="hf-lane-bar__seg" [class]="'hf-lane-bar__seg--' + share.cssClass" [style.width.%]="share.pct"></span>
+            }
+          </div>
+          <div class="hf-lane-legend">
+            @for (share of laneShares(); track share.lane) {
+              <span class="hf-lane-legend__item">
+                <span class="hf-lane-legend__dot" [class]="'hf-lane-legend__dot--' + share.cssClass"></span>
+                {{ share.label }} · {{ share.jobs }}
+              </span>
+            }
+          </div>
+        }
+
+        @if (channelShares().length > 0) {
+          <div class="hf-channel-shares">
+            @for (share of channelShares(); track share.channelId) {
+              <div class="hf-channel-share">
+                <span class="hf-channel-share__name">{{ share.name }}</span>
+                <span class="hf-channel-share__meta">{{ share.videos }} vid · {{ share.minutes }} min · {{ '$' + share.costUsd.toFixed(2) }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (est.blockers.length > 0) {
+          <div class="hf-blockers">
+            @for (blocker of est.blockers; track blocker) {
+              <div class="hf-blockers__row">
+                <hf-icon name="alert-triangle" [size]="14" />
+                <span>{{ blocker }}</span>
+              </div>
+            }
+            <a class="hf-blockers__link" [routerLink]="['/ajustes', 'proveedores']">Ir a Ajustes → Proveedores <hf-icon name="arrow-right" [size]="12" /></a>
+          </div>
+        }
+
+        <hf-button variant="primary" class="hf-summary__cta" [disabled]="!canSubmit()" [loading]="submitting()" (pressed)="forge()">
+          <hf-icon name="zap" [size]="14" />
+          Forjar {{ est.videos }} video{{ est.videos === 1 ? '' : 's' }}
+        </hf-button>
+        <p class="hf-summary__note">{{ startNote() }}</p>
+      </div>
+    }
+  </aside>
+</div>

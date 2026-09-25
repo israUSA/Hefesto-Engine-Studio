@@ -1,0 +1,82 @@
+<div
+  class="hf-drawer-backdrop"
+  tabindex="-1"
+  (click)="$event.target === $event.currentTarget && closed.emit()"
+  (keydown.escape)="closed.emit()"
+>
+  <div class="hf-drawer" role="dialog" aria-modal="true" aria-label="Guion">
+    <header class="hf-drawer__head">
+      <span class="hf-drawer__eyebrow">Guion</span>
+      <button type="button" class="hf-drawer__close" (click)="closed.emit()" aria-label="Cerrar">
+        <hf-icon name="close" [size]="14" />
+      </button>
+    </header>
+
+    @if (loading()) {
+      <hf-skeleton height="24px" width="60%" />
+      <hf-skeleton height="120px" />
+      <hf-skeleton height="80px" />
+    } @else if (error()) {
+      <hf-empty-state icon="wifi-off" [title]="error()!" />
+    } @else if (script(); as s) {
+      <div class="hf-drawer__body">
+        <div class="hf-drawer__status-row">
+          <hf-status-chip [tone]="s.status === 'approved' ? 'ok' : s.status === 'rejected' ? 'danger' : 'neutral'">
+            {{ s.status === 'approved' ? 'Aprobado' : s.status === 'rejected' ? 'Rechazado' : 'Borrador' }}
+          </hf-status-chip>
+          <span class="hf-drawer__meta-text">{{ s.wordCount }} palabras · {{ formatDuration(s.estimatedDurationSec) }}</span>
+        </div>
+
+        @if (s.verseRefs.length > 0) {
+          <div class="hf-drawer__verses">
+            @for (ref of s.verseRefs; track ref.book + ref.chapter + ref.verseStart) {
+              <hf-tag tone="accent">{{ formatVerseRef(ref) }}</hf-tag>
+            }
+          </div>
+        }
+
+        <label class="hf-field-label">
+          Título
+          <input class="hf-text-input" [(ngModel)]="title" />
+        </label>
+
+        <label class="hf-field-label">
+          Hook
+          <textarea class="hf-textarea" rows="3" [(ngModel)]="hook"></textarea>
+        </label>
+
+        <label class="hf-field-label">
+          Cuerpo
+          <textarea class="hf-textarea" rows="8" [(ngModel)]="body"></textarea>
+        </label>
+
+        <label class="hf-field-label">
+          Llamado a la acción (CTA)
+          <textarea class="hf-textarea" rows="2" [(ngModel)]="cta"></textarea>
+        </label>
+
+        @if (s.scenes.length > 0) {
+          <div class="hf-drawer__scenes">
+            <span class="hf-field-label">Escenas · {{ s.scenes.length }}</span>
+            <ol>
+              @for (scene of s.scenes; track scene.order) {
+                <li>{{ scene.text }}</li>
+              }
+            </ol>
+          </div>
+        }
+      </div>
+
+      <footer class="hf-drawer__footer">
+        <hf-button variant="secondary" [loading]="saving()" [disabled]="!dirty()" (pressed)="save()">
+          Guardar cambios
+        </hf-button>
+        <hf-button variant="danger" [loading]="deciding()" (pressed)="decide('rejected')">Rechazar</hf-button>
+        <hf-button variant="primary" [loading]="deciding()" (pressed)="decide('approved')">
+          <hf-icon name="check" [size]="13" />
+          Aprobar
+        </hf-button>
+      </footer>
+    }
+  </div>
+</div>

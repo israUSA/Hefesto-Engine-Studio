@@ -40,3 +40,12 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Nx
+out-tsc/
+.nx/migrate-runs/
+.nx/polygraph/
+.claude/settings.local.json
+.claude/worktrees/
+
+.angular

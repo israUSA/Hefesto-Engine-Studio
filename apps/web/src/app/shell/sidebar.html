@@ -1,0 +1,83 @@
+<div class="hf-sidebar">
+  <div class="hf-sidebar__brand">
+    <img class="hf-sidebar__logo" src="logo.png" alt="" width="28" height="28" />
+    <div class="hf-sidebar__wordmark">
+      <span class="hf-sidebar__name">Hefesto</span>
+      <span class="hf-sidebar__tagline">ENGINE STUDIO</span>
+    </div>
+    <button
+      type="button"
+      class="hf-sidebar__theme"
+      (click)="themeService.toggle()"
+      [attr.aria-label]="themeService.theme() === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+    >
+      <hf-icon [name]="themeService.theme() === 'dark' ? 'moon' : 'sun'" [size]="14" />
+    </button>
+  </div>
+
+  <nav class="hf-sidebar__nav">
+    <hf-nav-item link="/hoy" icon="sun" label="Hoy" />
+    <hf-nav-item link="/ideas-y-guiones" icon="lightbulb" label="Ideas y guiones" [count]="ideasCount()" />
+    <hf-nav-item link="/producir" icon="play" label="Producir" />
+    <hf-nav-item link="/cola" icon="queue" label="Cola" [count]="queueCount() || null" />
+    <hf-nav-item link="/biblioteca" icon="grid" label="Biblioteca" />
+    <hf-nav-item link="/calendario" icon="calendar" label="Calendario" />
+    <hf-nav-item link="/drive" icon="drive" label="Drive" />
+    <hf-nav-item link="/costos" icon="wallet" label="Costos" />
+    <hf-nav-item link="/consola" icon="terminal" label="Consola" />
+    <hf-nav-item link="/ajustes" icon="settings" label="Ajustes" />
+  </nav>
+
+  <div class="hf-sidebar__channels">
+    <div class="hf-sidebar__channels-head">
+      <a routerLink="/canales" class="hf-sidebar__channels-label">
+        <hf-section-label>Canales</hf-section-label>
+      </a>
+      <a routerLink="/canales" [queryParams]="{ new: 1 }" class="hf-sidebar__add" aria-label="Nuevo canal">
+        <hf-icon name="plus" [size]="13" />
+      </a>
+    </div>
+    <ul class="hf-sidebar__channel-list">
+      @for (item of channels(); track item.channel.id) {
+        <li>
+          <a class="hf-channel-row" [routerLink]="['/canales', item.channel.slug]" routerLinkActive="hf-channel-row--active">
+            <span class="hf-channel-row__avatar" [class]="'hf-channel-row__avatar--' + avatarTone(item.channel.id)">
+              {{ avatarLetter(item.channel.name) }}
+            </span>
+            <span class="hf-channel-row__name">{{ item.channel.name }}</span>
+            <hf-icon [name]="platformIcon(item.channel.platform)" [size]="13" class="hf-channel-row__platform" />
+          </a>
+        </li>
+      } @empty {
+        <li class="hf-sidebar__channels-empty">Sin canales todavía</li>
+      }
+    </ul>
+  </div>
+
+  <div class="hf-sidebar__footer">
+    @if (telemetryView(); as t) {
+      @if (t.gpu) {
+        <hf-meter label="GPU" [display]="t.gpu.display" [value]="t.gpu.pct" />
+      } @else {
+        <hf-meter label="GPU" display="sin GPU NVIDIA" [unavailable]="true" />
+      }
+      <hf-meter label="CPU" [display]="t.cpu.display" [value]="t.cpu.pct" />
+      @if (t.vram) {
+        <hf-meter label="VRAM" [display]="t.vram.display" [value]="t.vram.pct" />
+      }
+      <hf-meter label="Disco" [display]="t.disk.display" [value]="t.disk.pct" />
+    } @else {
+      <hf-meter label="GPU" display="—" [unavailable]="true" />
+      <hf-meter label="CPU" display="—" [unavailable]="true" />
+      <hf-meter label="Disco" display="—" [unavailable]="true" />
+    }
+    <div class="hf-sidebar__status">
+      <span class="hf-sidebar__status-dot" [class.hf-sidebar__status-dot--off]="!live.connected()"></span>
+      @if (live.connected()) {
+        {{ encoderLabel() ? 'Render con ' + encoderLabel() : 'Conectado' }}
+      } @else {
+        Sin conexión con el motor
+      }
+    </div>
+  </div>
+</div>

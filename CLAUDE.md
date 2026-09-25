@@ -13,7 +13,7 @@ Nx monorepo · Angular (`apps/web`) · NestJS (`apps/api`) · Electron (`apps/de
 - **Proveedores**: todo servicio intercambiable (IA, stock, transcripción, almacenamiento, publicación, avisos), local o en la nube, pasa por la interfaz de su capacidad y declara un `ProviderManifest`. Nunca se llama a un SDK, binario o API directo desde una etapa del pipeline. Ver [13](docs/13-proveedores-intercambiables.md).
 - **Cada llamada con costo** registra un `CostEntry`.
 - **Etapas idempotentes**: cada etapa calcula un hash de sus entradas y se salta si la salida existe con el mismo hash.
-- **Secretos** solo en `.env`, nunca en el repo ni en la base de datos en texto plano.
+- **Secretos**: el usuario los carga en la app (Ajustes → Proveedores; hoy `nx run api:cli keys set`) y se guardan cifrados con Windows DPAPI en `HEFESTO_HOME/secrets.json` (`SecretVault`, ADR-012). La base guarda solo el **nombre** (`secretRef`). `.env` es un respaldo para desarrollo. Nunca en el repo, en la base, en logs ni devueltos completos a la UI.
 
 ## Reglas que no se rompen
 

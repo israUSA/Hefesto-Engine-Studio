@@ -1,0 +1,124 @@
+<div class="hf-inspector">
+  <header class="hf-inspector__head">
+    <span class="hf-inspector__eyebrow">Inspector</span>
+    <button type="button" class="hf-inspector__close" (click)="closed.emit()" aria-label="Cerrar inspector">
+      <hf-icon name="close" [size]="14" />
+    </button>
+  </header>
+
+  @if (loading()) {
+    <hf-skeleton height="220px" />
+    <hf-skeleton height="16px" width="70%" />
+    <hf-skeleton height="80px" />
+  } @else if (error()) {
+    <hf-empty-state icon="wifi-off" [title]="error()!" />
+  } @else if (detail(); as d) {
+    <h2 class="hf-inspector__title">{{ d.title }}</h2>
+    <p class="hf-inspector__subtitle">{{ d.channelName }} · {{ d.platform === 'tiktok' ? 'TikTok' : 'YouTube' }}</p>
+
+    <div class="hf-inspector__player">
+      @if (d.videoUrl) {
+        <video #videoEl [src]="d.videoUrl" controls preload="metadata" [attr.poster]="d.thumbUrl || null"></video>
+      } @else {
+        <div class="hf-inspector__player-empty">
+          <hf-icon name="clapperboard" [size]="24" />
+          <span>Todavía no hay render</span>
+        </div>
+      }
+    </div>
+
+    <div class="hf-inspector__meta">
+      <div class="hf-inspector__meta-row">
+        <span>Estado</span>
+        <hf-status-chip [tone]="d.status === 'failed' ? 'danger' : d.status === 'running' ? 'accent' : d.qaPassed === false ? 'warn' : 'ok'" [pulse]="d.status === 'running'">
+          {{ d.status === 'failed' ? 'Falló' : d.status === 'running' ? 'Forjando' : d.qaPassed === false ? 'Revisar' : d.status === 'done' ? 'Listo' : 'Pendiente' }}
+        </hf-status-chip>
+      </div>
+      @if (qaSummary(); as qa) {
+        <div class="hf-inspector__meta-row">
+          <span>QA</span>
+          <span class="hf-inspector__meta-value">{{ qa.ratio }}</span>
+        </div>
+      }
+      <div class="hf-inspector__meta-row">
+        <span>Duración</span>
+        <span class="hf-inspector__meta-value">{{ formatDuration(d.durationMs) }}</span>
+      </div>
+      <div class="hf-inspector__meta-row">
+        <span>Costo</span>
+        <span class="hf-inspector__meta-value">${{ d.costUsd.toFixed(2) }}</span>
+      </div>
+      <div class="hf-inspector__meta-row">
+        <span>Guion</span>
+        <hf-tag [tone]="d.script.status === 'approved' ? 'accent' : 'neutral'">{{ d.script.status }}</hf-tag>
+      </div>
+    </div>
+
+    @if (d.scenes.length > 0) {
+      <section class="hf-inspector__section">
+        <span class="hf-inspector__section-label">Escenas · {{ d.scenes.length }} · {{ formatDuration(d.durationMs) }}</span>
+        <div class="hf-scene-strip">
+          @for (scene of d.scenes; track scene.order) {
+            <button type="button" class="hf-scene" (click)="seekTo(scene.startMs)" [title]="scene.text">
+              @if (scene.imageUrl) {
+                <img [src]="scene.imageUrl" [alt]="'Escena ' + scene.order" loading="lazy" />
+              } @else {
+                <span class="hf-scene__placeholder"><hf-icon name="image" [size]="14" /></span>
+              }
+              <span class="hf-scene__order">{{ (scene.order + 1).toString().padStart(2, '0') }}</span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (d.qa; as qa) {
+      <section class="hf-inspector__section">
+        <span class="hf-inspector__section-label">Control de calidad</span>
+        <ul class="hf-qa-list">
+          @for (check of qa.checks; track check.name) {
+            <li class="hf-qa-row">
+              <hf-icon [name]="check.passed ? 'check' : 'alert-triangle'" [size]="14" [class]="check.passed ? 'hf-qa-row__icon--ok' : 'hf-qa-row__icon--danger'" />
+              <span class="hf-qa-row__name">{{ check.name }}</span>
+              <span class="hf-qa-row__value">{{ check.value }} · {{ check.threshold }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <section class="hf-inspector__section">
+      <span class="hf-inspector__section-label">Etapas</span>
+      <div class="hf-stage-row">
+        @for (stage of d.stages; track stage.key) {
+          <hf-status-chip [tone]="stageTone(stage.state)" [pulse]="stage.state === 'running'">
+            {{ stageLabel(stage.key) }}
+          </hf-status-chip>
+        }
+      </div>
+    </section>
+
+    <section class="hf-inspector__actions">
+      <span class="hf-inspector__section-label">Rehacer desde…</span>
+      <div class="hf-inspector__retry-row">
+        <hf-select [options]="stageOptions" [ngModel]="retryStage()" (ngModelChange)="retryStage.set($event)" ariaLabel="Etapa desde donde rehacer" />
+        <hf-button variant="secondary" [loading]="retrying()" (pressed)="retry()">
+          <hf-icon name="refresh" [size]="13" />
+          Rehacer
+        </hf-button>
+      </div>
+      <hf-button variant="danger" (pressed)="deleteOpen.set(true)">
+        <hf-icon name="trash" [size]="13" />
+        Eliminar producción
+      </hf-button>
+    </section>
+  }
+</div>
+
+<hf-dialog [open]="deleteOpen()" title="Eliminar producción" (closed)="deleteOpen.set(false)">
+  <p>Se borrará el video, sus escenas y su costo asociado. Esta acción no se puede deshacer.</p>
+  <div footer>
+    <hf-button variant="secondary" (pressed)="deleteOpen.set(false)">Cancelar</hf-button>
+    <hf-button variant="danger" [loading]="deleting()" (pressed)="confirmDelete()">Eliminar</hf-button>
+  </div>
+</hf-dialog>

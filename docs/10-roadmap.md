@@ -27,15 +27,17 @@ Estimaciones para un desarrollador con asistencia de IA, a ritmo constante de me
 
 ## Fase 1 · Pipeline MVP (sin UI)
 Objetivo: **un comando que produce un short completo** para un canal.
-- [ ] Nx monorepo con `apps/api` y `libs/shared/types`
-- [ ] SQLite + Drizzle: Channel, Script, Scene, Production, Asset, CostEntry, BibleVerse
-- [ ] Importar la RV1909 y crear el módulo `bible`
-- [ ] Capa de proveedores (ver [13](13-proveedores-intercambiables.md)): manifiesto, `ProviderRegistry`, pruebas de contrato y proveedor `fake`
-- [ ] Adaptadores: Gemini (texto y TTS), OpenAI-compatible (Ollama y otros), Pexels, whisper.cpp como comando, almacenamiento en carpeta local
-- [ ] Etapas: guion (JSON estructurado) → voz → whisper.cpp → `subs.ass` → escenas stock → render FFmpeg NVENC
-- [ ] Script `fetch-binaries` (ffmpeg, whisper.cpp CUDA, modelo)
-- [ ] Idempotencia por `inputHash`
-- ✅ **Entregable**: `nx run api:produce --channel fe-diaria --count 3` → 3 videos en `HEFESTO_HOME`
+- [x] Nx monorepo con `apps/api` y `libs/shared/types`
+- [x] SQLite + Drizzle: Channel, Script, Scene, Production, Asset, CostEntry, BibleVerse
+- [x] Importar la RV1909 y crear el módulo `bible`
+- [x] Capa de proveedores (ver [13](13-proveedores-intercambiables.md)): manifiesto, `ProviderRegistry`, pruebas de contrato y proveedor `fake`
+- [x] Adaptadores: Gemini (texto y TTS), OpenAI-compatible (Ollama y otros), Pexels, whisper.cpp local (el almacenamiento en carpeta local pasa a la Fase 3)
+- [x] Etapas: guion (JSON estructurado) → voz → whisper.cpp → `subs.ass` → escenas stock → render FFmpeg (NVENC, QSV, AMF o x264, detección automática)
+- [x] Script `fetch-binaries` (ffmpeg, whisper.cpp CUDA, modelo)
+- [x] Idempotencia por `inputHash`
+- [x] QA básico (duración, WER, volumen, versículos exactos)
+- [ ] Probar con claves reales de Gemini y Pexels (falta: claves del usuario)
+- ✅ **Entregable**: `nx run api:produce --channel <slug> --count 3` → 3 videos en `HEFESTO_HOME` (probado en modo `--offline`)
 
 ## Fase 2 · App base
 - [ ] `apps/web` Angular con el design system implementado

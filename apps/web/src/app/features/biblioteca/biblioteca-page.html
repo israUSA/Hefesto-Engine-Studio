@@ -1,0 +1,81 @@
+<div class="hf-biblioteca" [class.hf-biblioteca--split]="selectedId()">
+  <div class="hf-biblioteca__main">
+    <header class="hf-biblioteca__head">
+      <div>
+        <h2 class="hf-biblioteca__title">Biblioteca</h2>
+        <p class="hf-biblioteca__count">{{ total() }} video{{ total() === 1 ? '' : 's' }}</p>
+      </div>
+      <div class="hf-biblioteca__filters">
+        <hf-select
+          class="hf-biblioteca__filter"
+          [options]="channelOptions()"
+          [ngModel]="channelFilter()"
+          (ngModelChange)="channelFilter.set($event); onFilterChange()"
+          ariaLabel="Filtrar por canal"
+        />
+        <hf-select
+          class="hf-biblioteca__filter"
+          [options]="qaOptions"
+          [ngModel]="qaFilter()"
+          (ngModelChange)="qaFilter.set($event); onFilterChange()"
+          ariaLabel="Filtrar por estado"
+        />
+        <hf-button variant="secondary" (pressed)="toggleSort()">
+          <hf-icon name="filter" [size]="13" />
+          {{ sortDesc() ? 'Más recientes' : 'Más antiguos' }}
+        </hf-button>
+      </div>
+    </header>
+
+    @if (loading()) {
+      <div class="hf-biblioteca__grid">
+        @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+          <hf-skeleton />
+        }
+      </div>
+    } @else if (loadError()) {
+      <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+        <hf-button variant="secondary" (pressed)="load(true)">Reintentar</hf-button>
+      </hf-empty-state>
+    } @else if (hasNoChannels()) {
+      <hf-empty-state icon="users" title="Todavía no hay canales" detail="Creá tu primer canal para empezar a producir videos.">
+        <hf-button variant="primary" [routerLink]="['/canales']" [queryParams]="{ nuevo: '1' }">
+          <hf-icon name="plus" [size]="14" />
+          Crear canal
+        </hf-button>
+      </hf-empty-state>
+    } @else if (displayItems().length === 0) {
+      <hf-empty-state icon="clapperboard" title="No hay videos con estos filtros" detail="Probá con otro canal o estado, o producí el primer video del canal." />
+    } @else {
+      <div class="hf-biblioteca__grid">
+        @for (item of displayItems(); track item.id) {
+          <button
+            type="button"
+            class="hf-biblioteca-card"
+            [class.hf-biblioteca-card--selected]="selectedId() === item.id"
+            (click)="select(item.id)"
+          >
+            <hf-thumb-9x16 [imageUrl]="item.thumbUrl ?? null" [durationText]="formatDuration(item.durationMs)" />
+            <span class="hf-biblioteca-card__title">{{ item.title }}</span>
+            <span class="hf-biblioteca-card__meta">
+              <span class="hf-biblioteca-card__channel">{{ item.channelName }}</span>
+              <hf-status-chip [tone]="statusOf(item).tone" [pulse]="item.status === 'running'">{{ statusOf(item).label }}</hf-status-chip>
+            </span>
+          </button>
+        }
+      </div>
+
+      @if (hasMore()) {
+        <div class="hf-biblioteca__more">
+          <hf-button variant="secondary" [loading]="loadingMore()" (pressed)="loadMore()">Cargar más</hf-button>
+        </div>
+      }
+    }
+  </div>
+
+  @if (selectedId(); as id) {
+    <aside class="hf-biblioteca__aside">
+      <hf-production-inspector [productionId]="id" (closed)="closeInspector()" (deleted)="onDeleted($event)" (retried)="onRetried()" />
+    </aside>
+  }
+</div>

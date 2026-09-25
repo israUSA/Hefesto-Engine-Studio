@@ -1,0 +1,200 @@
+@if (loading()) {
+  <div class="hf-hoy hf-hoy--loading">
+    <hf-skeleton height="80px" />
+    <hf-skeleton height="180px" />
+    <hf-skeleton height="220px" />
+  </div>
+} @else if (loadError()) {
+  <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+    <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
+  </hf-empty-state>
+} @else if (hasNoChannels()) {
+  <div class="hf-onboarding">
+    <span class="hf-onboarding__eyebrow">Primeros pasos</span>
+    <h1 class="hf-onboarding__headline">Forjá tu primer <em>canal</em></h1>
+    <p class="hf-onboarding__lead">
+      Hefesto todavía no tiene canales. Configurá tus proveedores, creá un canal y producí tu primer video.
+    </p>
+
+    @if (missingSecrets()) {
+      <div class="hf-onboarding__warning">
+        <hf-icon name="alert-triangle" [size]="14" />
+        Faltan claves de proveedor. Cargalas antes de producir.
+      </div>
+    }
+
+    <ol class="hf-onboarding__steps">
+      <li>
+        <span class="hf-onboarding__step-num">1</span>
+        <div>
+          <strong>Cargá tus claves</strong>
+          <span>en Ajustes → Proveedores</span>
+        </div>
+      </li>
+      <li>
+        <span class="hf-onboarding__step-num">2</span>
+        <div>
+          <strong>Creá un canal</strong>
+          <span>desde una plantilla de nicho o en blanco</span>
+        </div>
+      </li>
+      <li>
+        <span class="hf-onboarding__step-num">3</span>
+        <div>
+          <strong>Producí tu primer video</strong>
+          <span>elegí el canal y lanzá la tanda</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="hf-onboarding__actions">
+      <hf-button variant="primary" [routerLink]="['/canales']" [queryParams]="{ nuevo: '1' }">
+        <hf-icon name="plus" [size]="14" />
+        Crear tu primer canal
+      </hf-button>
+      <hf-button variant="secondary" routerLink="/ajustes/proveedores">
+        <hf-icon name="settings" [size]="14" />
+        Ir a Proveedores
+      </hf-button>
+    </div>
+  </div>
+} @else {
+  <div class="hf-hoy">
+    <div class="hf-hoy__main">
+      <header class="hf-hoy__head">
+        <div>
+          <span class="hf-hoy__date">{{ todayLabel }} · {{ weekLabel }}</span>
+          <h1 class="hf-hoy__headline">¿Qué forjamos <em>hoy</em>?</h1>
+        </div>
+        <div class="hf-hoy__actions">
+          <hf-button variant="secondary" [routerLink]="['/ideas-y-guiones']" [queryParams]="{ generate: '1' }">
+            <hf-icon name="sparkles" [size]="13" />
+            Nueva idea
+          </hf-button>
+          <hf-button variant="primary" routerLink="/producir">
+            <hf-icon name="play" [size]="13" />
+            Producir tanda
+          </hf-button>
+        </div>
+      </header>
+
+      <div class="hf-hoy__metrics">
+        <hf-metric [value]="readyCount()" label="Videos listos" />
+        <hf-metric [value]="queuedCount()" label="En cola" />
+        <hf-metric [value]="failedCount()" label="Fallidos" />
+        <hf-metric [value]="'$' + monthlySpend().toFixed(2)" label="Gasto del mes" />
+      </div>
+
+      <section class="hf-hoy__section">
+        <header class="hf-hoy__section-head">
+          <span>Necesita atención</span>
+          <span class="hf-hoy__section-count">{{ attentionRows().length }}</span>
+        </header>
+        @if (attentionRows().length === 0) {
+          <p class="hf-hoy__all-clear">
+            <hf-icon name="shield-check" [size]="14" />
+            Todo en orden por ahora.
+          </p>
+        } @else {
+          <div class="hf-attention-list">
+            @for (row of attentionRows(); track row.production.id) {
+              <a class="hf-attention-row" [routerLink]="['/biblioteca']" [queryParams]="{ open: row.production.id }">
+                <hf-icon name="alert-triangle" [size]="14" class="hf-attention-row__icon" />
+                <div class="hf-attention-row__text">
+                  <span class="hf-attention-row__title">{{ row.production.title }}</span>
+                  <span class="hf-attention-row__detail">{{ row.production.channelName }} · {{ row.reason }}</span>
+                </div>
+                <span class="hf-attention-row__link">Ver en Biblioteca <hf-icon name="arrow-right" [size]="12" /></span>
+              </a>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="hf-hoy__section">
+        <header class="hf-hoy__section-head">
+          <span>Forjando ahora</span>
+          <span class="hf-hoy__section-count">{{ forgingNow().length }}</span>
+        </header>
+        @if (forgingNow().length === 0) {
+          <p class="hf-hoy__all-clear">Nada forjando en este momento.</p>
+        } @else {
+          <div class="hf-forging-list">
+            @for (p of forgingNow(); track p.id) {
+              <div class="hf-forging-row">
+                <hf-status-chip tone="accent" [pulse]="true">Forjando</hf-status-chip>
+                <span class="hf-forging-row__title">{{ p.channelName }} · {{ p.title }}</span>
+                <span class="hf-forging-row__stage">{{ stageLabel(p.currentStep) }}</span>
+                <div class="hf-forging-row__bar"><hf-progress-bar [value]="pct(p.progress)" /></div>
+                <span class="hf-forging-row__pct">{{ pct(p.progress) }}%</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="hf-hoy__section">
+        <header class="hf-hoy__section-head">
+          <span>Publicación</span>
+        </header>
+        <hf-empty-state icon="calendar" title="Llega con la publicación" detail="El calendario y los conteos de videos publicados se habilitan en una etapa posterior del proyecto." />
+      </section>
+
+      <section class="hf-hoy__section">
+        <header class="hf-hoy__section-head">
+          <span>Canales</span>
+        </header>
+        <div class="hf-channel-rows">
+          @for (row of channelRows(); track row.summary.channel.id) {
+            <a class="hf-channel-row" [routerLink]="['/canales', row.summary.channel.slug]">
+              <span class="hf-channel-row__avatar">{{ row.summary.channel.name[0] }}</span>
+              <div class="hf-channel-row__about">
+                <span class="hf-channel-row__name">
+                  {{ row.summary.channel.name }}
+                  <hf-icon [name]="row.platformIcon" [size]="12" />
+                </span>
+                <span class="hf-channel-row__stats">
+                  {{ row.summary.videosThisMonth }} este mes · {{ row.summary.inQueue }} en cola · ${{ row.summary.costThisMonthUsd.toFixed(2) }}
+                </span>
+              </div>
+              <div class="hf-channel-row__thumbs">
+                @if (row.recent.length === 0) {
+                  <span class="hf-channel-row__empty">Sin videos aún</span>
+                } @else {
+                  @for (p of row.recent; track p.id) {
+                    <hf-thumb-9x16 [imageUrl]="p.thumbUrl ?? null" [aiMark]="false" class="hf-channel-row__thumb" />
+                  }
+                }
+              </div>
+            </a>
+          }
+        </div>
+      </section>
+    </div>
+
+    <aside class="hf-hoy__aside">
+      <section class="hf-aside-section">
+        <header class="hf-aside-section__head">
+          <span>Tubería</span>
+          <span>esta semana</span>
+        </header>
+        <div class="hf-pipeline-list">
+          @for (row of pipeline(); track row.id) {
+            <div class="hf-pipeline-row">
+              <span class="hf-pipeline-row__label">{{ row.label }}</span>
+              <div class="hf-pipeline-row__bar"><hf-progress-bar [value]="row.pct" /></div>
+              <span class="hf-pipeline-row__count">{{ row.count.toString().padStart(2, '0') }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="hf-aside-section">
+        <header class="hf-aside-section__head">
+          <span>Gasto del mes</span>
+        </header>
+        <p class="hf-aside-spend">${{ monthlySpend().toFixed(2) }}</p>
+      </section>
+    </aside>
+  </div>
+}

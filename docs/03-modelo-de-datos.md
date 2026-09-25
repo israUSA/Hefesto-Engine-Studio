@@ -93,7 +93,7 @@ scripted → voiced → transcribed → visuals_ready → rendered → qa_passed
 `productionId?`, `channelId`, `providerConfigId`, `operation`, `units` (caracteres, tokens, imágenes, segundos), `costUsd` (0 si es local), `durationMs`, `createdAt`.
 
 ### ProviderConfig
-Instancia configurada de un adaptador (ver [13](13-proveedores-intercambiables.md)): `name` ("Ollama · qwen3 4B"), `adapter` (`openai-compatible` \| `gemini` \| `sidecar` \| `command` \| `manual`…), `capabilities[]`, `baseUrl?`, `model?`, `params` (JSON), `secretRef?` (**nombre** de la variable de `.env`, nunca el valor), `pricingOverride?`, `enabled`, `lastHealth`.
+Instancia configurada de un adaptador (ver [13](13-proveedores-intercambiables.md)): `name` ("Ollama · qwen3 4B"), `adapter` (`openai-compatible` \| `gemini` \| `sidecar` \| `command` \| `manual`…), `capabilities[]`, `baseUrl?`, `model?`, `params` (JSON), `secretRef?` (**nombre** de la clave en la bóveda cifrada, por ejemplo `GEMINI_API_KEY`; nunca el valor), `pricingOverride?`, `enabled`, `lastHealth`.
 
 ### ProviderBinding
 Qué instancia usa cada canal: `channelId?` (vacío = valor global), `capability`, `role?` (`ideas` \| `script` \| `metadata` \| `keywords`, solo para texto), `providerConfigId`, `params` (se aplican encima de los de la instancia), `fallbackIds[]`.

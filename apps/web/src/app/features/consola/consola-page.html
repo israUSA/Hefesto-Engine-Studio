@@ -1,0 +1,89 @@
+<div class="hf-consola">
+  <header class="hf-consola__head">
+    <div>
+      <h1 class="hf-consola__title">Consola <em>en vivo</em></h1>
+      <p class="hf-consola__subline">
+        {{ counts().all }} línea{{ counts().all === 1 ? '' : 's' }}
+        @if (counts().warn > 0) {
+          · {{ counts().warn }} aviso{{ counts().warn === 1 ? '' : 's' }}
+        }
+        @if (counts().error > 0) {
+          · {{ counts().error }} error{{ counts().error === 1 ? '' : 's' }}
+        }
+        @if (rateLabel()) {
+          · {{ rateLabel() }}
+        }
+      </p>
+    </div>
+
+    <div class="hf-consola__controls">
+      <div class="hf-level-tabs" role="tablist">
+        <button type="button" role="tab" class="hf-level-tabs__btn" [class.hf-level-tabs__btn--active]="levelFilter() === 'all'" (click)="setLevel('all')">
+          Todo
+        </button>
+        <button type="button" role="tab" class="hf-level-tabs__btn" [class.hf-level-tabs__btn--active]="levelFilter() === 'info'" (click)="setLevel('info')">
+          <span class="hf-level-dot hf-level-dot--info"></span>Info
+        </button>
+        <button type="button" role="tab" class="hf-level-tabs__btn" [class.hf-level-tabs__btn--active]="levelFilter() === 'warn'" (click)="setLevel('warn')">
+          <span class="hf-level-dot hf-level-dot--warn"></span>Avisos {{ counts().warn }}
+        </button>
+        <button type="button" role="tab" class="hf-level-tabs__btn" [class.hf-level-tabs__btn--active]="levelFilter() === 'error'" (click)="setLevel('error')">
+          <span class="hf-level-dot hf-level-dot--error"></span>Errores {{ counts().error }}
+        </button>
+        <button type="button" role="tab" class="hf-level-tabs__btn" [class.hf-level-tabs__btn--active]="levelFilter() === 'debug'" (click)="setLevel('debug')">
+          Debug
+        </button>
+      </div>
+
+      <hf-input class="hf-consola__search" icon="filter" placeholder="job:4809 o texto…" [ngModel]="search()" (ngModelChange)="search.set($event)" ariaLabel="Buscar en los logs" />
+
+      <hf-select class="hf-consola__select" [options]="sourceOptions()" [ngModel]="sourceFilter()" (ngModelChange)="sourceFilter.set($event)" ariaLabel="Filtrar por fuente" />
+      <hf-select class="hf-consola__select" [options]="productionOptions()" [ngModel]="productionFilter()" (ngModelChange)="productionFilter.set($event)" ariaLabel="Filtrar por producción" />
+
+      <hf-button variant="secondary" (pressed)="clear()">
+        <hf-icon name="trash" [size]="13" />
+        Limpiar
+      </hf-button>
+      <hf-button [variant]="follow() ? 'primary' : 'secondary'" (pressed)="toggleFollow()">
+        <hf-icon [name]="follow() ? 'play' : 'pause'" [size]="13" />
+        {{ follow() ? 'Siguiendo' : 'Seguir' }}
+      </hf-button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <hf-skeleton height="420px" />
+  } @else if (loadError()) {
+    <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+      <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
+    </hf-empty-state>
+  } @else if (baseLogs().length === 0) {
+    <hf-empty-state icon="terminal" title="Sin logs todavía" detail="Los eventos del motor van a aparecer acá en cuanto ocurran." />
+  } @else if (rendered().length === 0) {
+    <hf-empty-state icon="filter" title="Ningún log coincide con los filtros" detail="Probá cambiar el nivel, la fuente o el texto buscado." />
+  } @else {
+    <div class="hf-console" #scrollEl (scroll)="onScroll(scrollEl)">
+      @for (row of rendered(); track row.entry.id) {
+        <div class="hf-console__line" [class]="'hf-console__line--' + row.entry.level">
+          <span class="hf-console__time">{{ row.time }}</span>
+          <span class="hf-console__level">{{ row.entry.level.toUpperCase() }}</span>
+          <span class="hf-console__source">{{ row.entry.source }}</span>
+          <span class="hf-console__job">{{ row.jobShort }}</span>
+          <span class="hf-console__message">{{ row.entry.message }}</span>
+          <button type="button" class="hf-console__copy" (click)="copyLine(row.entry)" aria-label="Copiar línea">
+            <hf-icon name="copy" [size]="12" />
+          </button>
+        </div>
+      }
+      @if (hiddenCount() > 0) {
+        <div class="hf-console__hidden">mostrando las últimas {{ rendered().length }} de {{ filtered().length }} líneas</div>
+      }
+      @if (follow()) {
+        <div class="hf-console__tail">
+          <span class="hf-console__tail-dot"></span>
+          siguiendo{{ rateLabel() ? ' · ' + rateLabel() : '' }}
+        </div>
+      }
+    </div>
+  }
+</div>

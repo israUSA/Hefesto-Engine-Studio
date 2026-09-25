@@ -1,0 +1,115 @@
+@if (store.loading()) {
+  <hf-skeleton height="300px" />
+} @else {
+  <div class="hf-identidad">
+    <section class="hf-identidad__section">
+      <h3 class="hf-identidad__heading">Datos básicos</h3>
+      <div class="hf-identidad__row">
+        <div class="hf-field-label">
+          <span>Nombre</span>
+          <hf-input [(ngModel)]="name" ariaLabel="Nombre" />
+        </div>
+        <div class="hf-field-label">
+          <span>Handle</span>
+          <hf-input [(ngModel)]="handle" ariaLabel="Handle" />
+        </div>
+        <div class="hf-field-label">
+          <span>Plataforma</span>
+          <hf-select [options]="platforms" [(ngModel)]="platform" ariaLabel="Plataforma" />
+        </div>
+      </div>
+      <div class="hf-field-label">
+        <span>Nicho / tema</span>
+        <hf-input [(ngModel)]="topic" ariaLabel="Nicho o tema" />
+      </div>
+      <div class="hf-identidad__row">
+        <div class="hf-field-label">
+          <span>Duración mínima (s)</span>
+          <hf-input type="number" [(ngModel)]="durationMin" ariaLabel="Duración mínima en segundos" />
+        </div>
+        <div class="hf-field-label">
+          <span>Duración máxima (s)</span>
+          <hf-input type="number" [(ngModel)]="durationMax" ariaLabel="Duración máxima en segundos" />
+        </div>
+      </div>
+      <label class="hf-field-label" for="bible-textarea">
+        <span>Biblia del canal</span>
+        <textarea
+          id="bible-textarea"
+          class="hf-textarea"
+          rows="4"
+          [(ngModel)]="bible"
+          placeholder="Tono, audiencia, qué sí y qué no, ejemplos…"
+        ></textarea>
+      </label>
+    </section>
+
+    <section class="hf-identidad__section">
+      <h3 class="hf-identidad__heading">Voz</h3>
+      <div class="hf-identidad__row">
+        <div class="hf-field-label">
+          <span>Voice ID</span>
+          <hf-input [(ngModel)]="voiceId" icon="mic" ariaLabel="Voice ID" />
+        </div>
+        <div class="hf-field-label">
+          <span>Idioma</span>
+          <hf-input [(ngModel)]="voiceLanguage" ariaLabel="Idioma de la voz" />
+        </div>
+        <div class="hf-field-label">
+          <span>Velocidad</span>
+          <hf-input type="number" [(ngModel)]="speed" ariaLabel="Velocidad de la voz" />
+        </div>
+      </div>
+      <div class="hf-field-label">
+        <span>Estilo de voz</span>
+        <hf-input
+          [(ngModel)]="stylePrompt"
+          placeholder="Ej. Voz cálida y pausada, tono de oración"
+          ariaLabel="Estilo de voz"
+        />
+      </div>
+
+      <div class="hf-identidad__voice-preview">
+        <hf-button variant="secondary" [loading]="previewing()" (pressed)="previewVoice()">
+          <hf-icon name="play-circle" [size]="14" />
+          Probar voz
+        </hf-button>
+        @if (previewAudioUrl(); as url) {
+          <audio controls [src]="url"></audio>
+        }
+        @if (previewError()) {
+          <span class="hf-error">{{ previewError() }}</span>
+        }
+      </div>
+    </section>
+
+    <section class="hf-identidad__section">
+      <h3 class="hf-identidad__heading">Estilo visual</h3>
+      <div class="hf-identidad__row">
+        <div class="hf-field-label">
+          <span>Fuente</span>
+          <hf-select [options]="visualSources" [(ngModel)]="visualSource" ariaLabel="Fuente visual" />
+        </div>
+        <div class="hf-field-label">
+          <span>Movimiento</span>
+          <hf-select [options]="motions" [(ngModel)]="motion" ariaLabel="Movimiento" />
+        </div>
+      </div>
+      <div class="hf-field-label">
+        <span>Prompt base</span>
+        <hf-input
+          [(ngModel)]="basePrompt"
+          placeholder="Ej. paisajes serenos, luz cálida, cinemático"
+          ariaLabel="Prompt visual base"
+        />
+      </div>
+    </section>
+
+    <div class="hf-identidad__actions">
+      <hf-button variant="primary" [loading]="saving()" (pressed)="save()">
+        <hf-icon name="check" [size]="14" />
+        Guardar identidad
+      </hf-button>
+    </div>
+  </div>
+}

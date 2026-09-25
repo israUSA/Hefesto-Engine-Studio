@@ -105,6 +105,7 @@ Un `ProviderRegistry` resuelve qué instancia usar según el canal, la capacidad
 ```
 HEFESTO_HOME/
 ├─ hefesto.db
+├─ secrets.json             # claves cifradas con DPAPI
 ├─ channels/<channel-slug>/
 │  └─ productions/<production-id>/
 │     ├─ script.json         # guion + escenas + metadatos
@@ -119,17 +120,16 @@ HEFESTO_HOME/
 └─ logs/
 ```
 
-## Variables de entorno
+## Claves y configuración
+
+Las claves de API y los tokens OAuth **los carga el usuario en la app** (Ajustes → Proveedores) y se guardan cifrados con Windows DPAPI en `HEFESTO_HOME/secrets.json` (ver [ADR-012](11-decisiones.md)). Mientras no hay UI: `npx nx run api:cli keys set GEMINI_API_KEY`.
+
+Variables de entorno opcionales (`.env`, para desarrollo):
 
 ```
-HEFESTO_HOME=
-GEMINI_API_KEY=
-GOOGLE_OAUTH_CLIENT_ID=
-GOOGLE_OAUTH_CLIENT_SECRET=
-PEXELS_API_KEY=
-PIXABAY_API_KEY=
-# Fase 5
-YOUTUBE_*=   # usa el mismo OAuth de Google con otros scopes
-TIKTOK_CLIENT_KEY=
-TIKTOK_CLIENT_SECRET=
+HEFESTO_HOME=            # carpeta de trabajo (por defecto ~/HefestoHome)
+HEFESTO_BIN_DIR=         # ffmpeg, whisper-cli y modelos (por defecto ./bin)
+HEFESTO_ENCODER=auto     # auto | h264_nvenc | h264_qsv | h264_amf | libx264
+HEFESTO_WHISPER_MODEL=   # modelo en bin/models
+GEMINI_API_KEY=          # respaldo: la bóveda tiene prioridad
 ```

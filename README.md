@@ -67,6 +67,29 @@ git clone https://github.com/israUSA/Hefesto-Engine-Studio.git
 - GPU: **NVIDIA RTX 3050 Laptop, 4 GB VRAM**. Alcanza para Whisper y NVENC; la voz y las imágenes IA van a la nube.
 - SO: Windows 11.
 
+## Cómo correrlo (Fase 1)
+
+Requisitos: Node 22 o más nuevo y Windows 10/11.
+
+```bash
+npm install
+npx ts-node --transpile-only --project tools/tsconfig.json tools/fetch-binaries.ts   # ffmpeg, whisper.cpp y modelo en bin/
+npx nx run api:cli setup    # crea la base, el catálogo de proveedores y la RV1909 (sin canales)
+npx nx run api:cli keys set GEMINI_API_KEY   # pide la clave oculta y la guarda cifrada
+npx nx run api:cli keys set PEXELS_API_KEY
+npx nx run api:cli keys     # qué claves faltan
+npx nx run api:cli setup --demo   # opcional: canales de demostración desde las plantillas
+npx nx run api:produce --channel demo-devocional --count 3
+```
+
+- La app instalada arranca **vacía** (sin canales): al primer inicio carga el catálogo de proveedores y la Biblia sola. Los canales se crean desde la app, en blanco o desde una plantilla de nicho.
+- Sin claves: `npx nx run api:cli setup --offline` usa el proveedor `fake` para texto, voz, stock y transcripción (sirve para probar el render). Para volver a los proveedores reales: `setup --reset-bindings`.
+- Retomar o rehacer: `--resume <productionId>` salta lo que no cambió; `--force` rehace todo.
+- Los videos quedan en `HEFESTO_HOME/channels/<canal>/productions/<id>/` (`render.mp4`, `thumb.jpg`, `qa.json`…). Por defecto `HEFESTO_HOME` es `~/HefestoHome`.
+- El codificador se detecta solo: NVENC (NVIDIA) → QSV (Intel) → AMF (AMD) → libx264. Se puede forzar con `HEFESTO_ENCODER`.
+- Las claves se guardan cifradas con Windows DPAPI en `HEFESTO_HOME/secrets.json` (solo tu usuario de Windows puede leerlas). En la Fase 2 se cargan desde Ajustes → Proveedores. `.env` sigue funcionando como respaldo para desarrollo.
+- Pruebas: `npx jest --config apps/api/jest.config.cts`.
+
 ## Estado
 
-🟡 **Fase 0: planificación y diseño.** Ver [roadmap](docs/10-roadmap.md).
+🟡 **Fase 1: pipeline MVP.** El pipeline corre de punta a punta; falta probarlo con claves reales. Ver [roadmap](docs/10-roadmap.md).

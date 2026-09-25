@@ -1,0 +1,156 @@
+<div class="hf-providers">
+  <header class="hf-providers__head">
+    <div>
+      <h2 class="hf-providers__title">Proveedores</h2>
+      <p class="hf-providers__desc">
+        Cada aspecto usa un proveedor <em>intercambiable</em>: en la nube, local o manual. Las claves se guardan
+        cifradas en tu Windows y solo se muestran sus últimos 4 caracteres.
+      </p>
+    </div>
+    <hf-button variant="primary" (pressed)="addProviderOpen.set(true)">
+      <hf-icon name="plus" [size]="14" />
+      Agregar proveedor
+    </hf-button>
+  </header>
+
+  @if (loading()) {
+    <div class="hf-providers__rows">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="hf-provider-row">
+          <hf-skeleton height="52px" />
+        </div>
+      }
+    </div>
+  } @else if (loadError()) {
+    <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+      <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
+    </hf-empty-state>
+  } @else if (rows().length === 0) {
+    <hf-empty-state icon="zap" title="Todavía no hay proveedores configurados" detail="Agregá uno para empezar." />
+  } @else {
+    <div class="hf-providers__rows">
+      @for (row of rows(); track row.capability) {
+        <div class="hf-provider-row">
+          <div class="hf-provider-row__about">
+            <hf-icon [name]="row.icon" [size]="16" />
+            <div>
+              <div class="hf-provider-row__label">{{ row.label }}</div>
+              <div class="hf-provider-row__kind">
+                {{ kindOf(row) }}{{ row.roleCount > 1 ? ' · ' + row.roleCount + ' roles' : '' }}
+              </div>
+            </div>
+          </div>
+
+          <hf-select
+            class="hf-provider-row__select"
+            [options]="row.options"
+            [ngModel]="row.binding.providerConfigId"
+            (ngModelChange)="onProviderChange(row, $event)"
+          />
+
+          <button
+            type="button"
+            class="hf-provider-row__secret"
+            [disabled]="!row.provider?.secret"
+            (click)="openChangeSecret(row)"
+          >
+            <hf-icon name="key" [size]="13" />
+            @if (row.secretLast4) {
+              <span>••••••••{{ row.secretLast4 }}</span>
+            } @else {
+              <span>Sin clave</span>
+            }
+            @if (row.secretSource) {
+              <hf-tag>{{ row.secretSource === 'vault' ? 'cifrada' : '.env' }}</hf-tag>
+            }
+          </button>
+
+          <div class="hf-provider-row__status">
+            @if (row.testing) {
+              <hf-status-chip tone="neutral" [pulse]="true">Probando…</hf-status-chip>
+            } @else if (row.health) {
+              <hf-status-chip [tone]="row.health.ok ? 'ok' : 'danger'">
+                {{ row.health.ok ? 'Conectado' : 'Error' }}
+              </hf-status-chip>
+              <span class="hf-provider-row__status-text">{{ row.health.message }}</span>
+            } @else {
+              <span class="hf-provider-row__status-text">{{ row.fallbackLabel }}</span>
+            }
+          </div>
+
+          <hf-button variant="secondary" [loading]="row.testing" (pressed)="test(row)">
+            <hf-icon name="zap" [size]="13" />
+            Probar
+          </hf-button>
+        </div>
+      }
+    </div>
+
+    <section class="hf-limits">
+      <span class="hf-limits__label">Límites de la cola</span>
+      <div class="hf-limits__grid">
+        <div class="hf-limits__field">
+          <span>Presupuesto mensual</span>
+          <hf-input
+            type="number"
+            icon="wallet"
+            ariaLabel="Presupuesto mensual en dólares"
+            [ngModel]="budgetUsd()"
+            (ngModelChange)="budgetUsd.set($event)"
+          >
+            <hf-tag>USD</hf-tag>
+          </hf-input>
+        </div>
+        <div class="hf-limits__field">
+          <span>Tareas de red en paralelo</span>
+          <hf-input
+            type="number"
+            icon="globe"
+            ariaLabel="Tareas de red en paralelo"
+            [ngModel]="netConcurrency()"
+            (ngModelChange)="netConcurrency.set($event)"
+          >
+            <hf-tag>máx. 4</hf-tag>
+          </hf-input>
+        </div>
+        <div class="hf-limits__field">
+          <span>Reintentos por tarea</span>
+          <hf-input
+            type="number"
+            icon="refresh"
+            ariaLabel="Reintentos por tarea"
+            [ngModel]="retries()"
+            (ngModelChange)="retries.set($event)"
+          >
+            <hf-tag>backoff 40 s</hf-tag>
+          </hf-input>
+        </div>
+        <div class="hf-limits__field">
+          <span>GPU en paralelo</span>
+          <hf-input type="number" ariaLabel="GPU en paralelo, fijo en 1" [ngModel]="1" [disabled]="true" />
+        </div>
+        <label class="hf-limits__toggle">
+          <input type="checkbox" [ngModel]="pauseOnQaFail()" (ngModelChange)="pauseOnQaFail.set($event)" />
+          Pausar si falla QA
+        </label>
+      </div>
+      <div class="hf-limits__actions">
+        <hf-button variant="secondary" (pressed)="resetLimits()">Valores por defecto</hf-button>
+        <hf-button variant="primary" [loading]="savingLimits()" (pressed)="saveLimits()">
+          <hf-icon name="check" [size]="14" />
+          Guardar cambios
+        </hf-button>
+      </div>
+    </section>
+  }
+</div>
+
+<hf-add-provider-dialog
+  [open]="addProviderOpen()"
+  (closed)="addProviderOpen.set(false)"
+  (created)="onProviderCreated()"
+/>
+
+@if (changeSecretFor(); as name) {
+  <hf-change-secret-dialog [open]="true" [secretName]="name" (closed)="changeSecretFor.set(null)" (saved)="onSecretSaved()" />
+}

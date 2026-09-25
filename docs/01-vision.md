@@ -46,9 +46,13 @@ Lo que **le falta** y es el foco de Hefesto Engine Studio:
 
 Canales de **contenido cristiano en español** (oraciones, versículos, devocionales, historias bíblicas) en TikTok y YouTube Shorts. Ver [08 · Nicho cristiano](08-nicho-cristiano.md).
 
-## Canales de ejemplo (prototipo)
+## El producto arranca vacío
 
-| Canal | Plataforma | Nicho |
+Hefesto se piensa como **producto vendible**: una instalación nueva no trae canales ni datos personales. Trae el catálogo de proveedores (sin claves), la Biblia RV1909 (dominio público) y **plantillas de nicho** para crear canales: Devocional cristiano, Salmos y reflexión, Historia y datos de videojuegos, Motivación y ejercicio, Datos curiosos. Cada plantilla precarga la "biblia del canal", la voz y el estilo visual; el usuario pone el nombre y ajusta.
+
+Los canales de abajo son solo **ejemplos del prototipo de diseño**. En desarrollo se crean canales de demostración con `npx nx run api:cli setup --demo`.
+
+| Canal (ejemplo) | Plataforma | Nicho |
 |---|---|---|
 | Fe Diaria | TikTok | Cristiano: oraciones y versículos |
 | Fe Diaria Shorts | YouTube | Cristiano |

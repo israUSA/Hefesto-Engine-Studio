@@ -1,0 +1,22 @@
+<div class="hf-app">
+  <aside class="hf-app__sidebar">
+    <hf-sidebar />
+  </aside>
+
+  <main class="hf-app__panel">
+    <hf-forge-strip />
+
+    @if (!live.connected()) {
+      <div class="hf-app__banner">
+        <hf-icon name="wifi-off" [size]="14" />
+        No se pudo conectar con el motor. Reintentando…
+      </div>
+    }
+
+    <div class="hf-app__content">
+      <router-outlet />
+    </div>
+
+    <hf-toast-outlet />
+  </main>
+</div>

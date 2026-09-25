@@ -1,0 +1,49 @@
+@if (store.loading()) {
+  <hf-skeleton height="120px" />
+} @else if (store.error()) {
+  <hf-empty-state icon="wifi-off" [title]="store.error()!" detail="Verificá que el motor esté corriendo e intentá de nuevo." />
+} @else if (store.channel(); as channel) {
+  <div class="hf-canal">
+    <header class="hf-canal__head">
+      <span class="hf-canal__avatar">{{ channel.name[0] }}</span>
+      <div class="hf-canal__title-block">
+        <div class="hf-canal__title-row">
+          <h2 class="hf-canal__name">{{ channel.name }}</h2>
+          <span class="hf-canal__platform">
+            <hf-icon [name]="platformIcon(channel.platform)" [size]="12" />
+            {{ channel.platform === 'tiktok' ? 'TikTok' : 'YouTube' }}
+          </span>
+          <hf-status-chip [tone]="channel.active ? 'ok' : 'neutral'">
+            {{ channel.active ? 'Activo' : 'Inactivo' }}
+          </hf-status-chip>
+        </div>
+        <p class="hf-canal__topic">{{ channel.topic }}</p>
+        <p class="hf-canal__meta">
+          {{ channel.handle }} · {{ channel.language.toUpperCase() }} · {{ channel.format }} ·
+          {{ channel.durationTarget.min }}–{{ channel.durationTarget.max }} s
+          {{ channel.aiLabel ? '· etiqueta IA' : '' }}
+        </p>
+      </div>
+      <div class="hf-canal__actions">
+        <hf-button variant="secondary" routerLink="identidad">
+          <hf-icon name="edit" [size]="14" />
+          Editar canal
+        </hf-button>
+        <hf-button variant="primary" [routerLink]="['/producir']" [queryParams]="{ channelId: channel.id }">
+          <hf-icon name="play" [size]="14" />
+          Producir para este canal
+        </hf-button>
+      </div>
+    </header>
+
+    <nav class="hf-canal__tabs">
+      @for (tab of tabs; track tab.path) {
+        <a [routerLink]="tab.path" routerLinkActive="hf-canal__tab--active" class="hf-canal__tab">{{ tab.label }}</a>
+      }
+    </nav>
+
+    <div class="hf-canal__tab-content">
+      <router-outlet />
+    </div>
+  </div>
+}

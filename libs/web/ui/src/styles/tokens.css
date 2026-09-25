@@ -1,0 +1,114 @@
+/*
+ * Design tokens — see docs/09-diseno-ui.md.
+ * Dark is the default theme; [data-theme="light"] on <html> switches it.
+ * Every semantic color also has a "-soft" variant for tinted backgrounds.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #0a0a0b;
+  --surface: #121214;
+  --surface-2: #19191c;
+  --surface-3: #222226;
+
+  /* Borders */
+  --line: #232327;
+  --line-strong: #34343a;
+
+  /* Text */
+  --text: #f3f2ef;
+  --text-2: #a3a29d;
+  --text-3: #8a8984;
+
+  /* Accent: molten metal. One CTA + the "forjando" state per view. */
+  --accent: #ff5b1f;
+  --accent-soft: rgba(255, 91, 31, 0.14);
+  --accent-ink: #1a0d06;
+
+  /* Status */
+  --ok: #2fbf71;
+  --ok-soft: rgba(47, 191, 113, 0.14);
+  --warn: #e8a93c;
+  --warn-soft: rgba(232, 169, 60, 0.14);
+  --danger: #f0524a;
+  --danger-soft: rgba(240, 82, 74, 0.14);
+  --steel: #5b8def;
+  --steel-soft: rgba(91, 141, 239, 0.14);
+
+  /* Brand-kit only (subtitle burn-in), never UI chrome. */
+  --sub-highlight: #ffd23f;
+
+  /* Typography */
+  --font-ui: 'Geist', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 28px;
+  --text-display: 40px;
+
+  --tracking-label: 0.08em;
+  --leading-tight: 1.2;
+  --leading-base: 1.5;
+
+  /* Spacing (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+
+  --shadow-panel: none;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f2f1ed;
+  --surface: #ffffff;
+  --surface-2: #e9e8e2;
+  --surface-3: #dedcd5;
+
+  --line: #dad8d0;
+  --line-strong: #c4c1b7;
+
+  --text: #121211;
+  --text-2: #55534e;
+  --text-3: #76736b;
+
+  --accent: #f04a0c;
+  --accent-soft: rgba(240, 74, 12, 0.1);
+  --accent-ink: #fff4ee;
+
+  --ok: #1c9457;
+  --ok-soft: rgba(28, 148, 87, 0.12);
+  --warn: #b8791a;
+  --warn-soft: rgba(184, 121, 26, 0.12);
+  --danger: #c93b33;
+  --danger-soft: rgba(201, 59, 51, 0.12);
+  --steel: #3763c9;
+  --steel-soft: rgba(55, 99, 201, 0.12);
+
+  --sub-highlight: #ffd23f;
+}

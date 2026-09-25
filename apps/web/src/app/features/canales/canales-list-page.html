@@ -1,0 +1,64 @@
+<div class="hf-canales">
+  <header class="hf-canales__head">
+    <h2 class="hf-canales__title">Canales</h2>
+    <hf-button variant="primary" (pressed)="dialogOpen.set(true)">
+      <hf-icon name="plus" [size]="14" />
+      Nuevo canal
+    </hf-button>
+  </header>
+
+  @if (loading()) {
+    <div class="hf-canales__grid">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <hf-skeleton height="140px" />
+      }
+    </div>
+  } @else if (loadError()) {
+    <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+      <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
+    </hf-empty-state>
+  } @else if (channels().length === 0) {
+    <hf-empty-state
+      icon="users"
+      title="Todavía no hay canales"
+      detail="Creá el primero en blanco o desde una plantilla de nicho: trae el tono, la voz y el estilo visual listos para ajustar."
+    >
+      <hf-button variant="primary" (pressed)="dialogOpen.set(true)">Nuevo canal</hf-button>
+    </hf-empty-state>
+  } @else {
+    <div class="hf-canales__grid">
+      @for (item of channels(); track item.channel.id) {
+        <a class="hf-canal-card" [routerLink]="[item.channel.slug]">
+          <div class="hf-canal-card__head">
+            <span class="hf-canal-card__avatar">{{ item.channel.name[0] }}</span>
+            <div class="hf-canal-card__name-block">
+              <span class="hf-canal-card__name">{{ item.channel.name }}</span>
+              <span class="hf-canal-card__handle">{{ item.channel.handle }}</span>
+            </div>
+            <hf-icon [name]="platformIcon(item.channel.platform)" [size]="14" />
+          </div>
+          <p class="hf-canal-card__topic">{{ item.channel.topic }}</p>
+          <div class="hf-canal-card__stats">
+            <div>
+              <span class="hf-canal-card__stat-value">{{ item.videosThisMonth }}</span>
+              <span class="hf-canal-card__stat-label">este mes</span>
+            </div>
+            <div>
+              <span class="hf-canal-card__stat-value">{{ item.inQueue }}</span>
+              <span class="hf-canal-card__stat-label">en cola</span>
+            </div>
+            <div>
+              <span class="hf-canal-card__stat-value">${{ item.costThisMonthUsd.toFixed(2) }}</span>
+              <span class="hf-canal-card__stat-label">gasto</span>
+            </div>
+          </div>
+          @if (!item.channel.active) {
+            <hf-tag>Inactivo</hf-tag>
+          }
+        </a>
+      }
+    </div>
+  }
+</div>
+
+<hf-channel-form-dialog [open]="dialogOpen()" (closed)="closeDialog()" (created)="onCreated($event)" />
