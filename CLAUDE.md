@@ -21,3 +21,11 @@ Nx monorepo · Angular (`apps/web`) · NestJS (`apps/api`) · Electron (`apps/de
 2. **Una sola tarea de GPU a la vez** (Whisper y el render con NVENC comparten 4 GB de VRAM).
 3. **No se publica nada sin pasar QA** y sin la etiqueta de contenido IA cuando corresponde.
 4. **No usar modelos con licencia no comercial** (XTTS v2, pesos de F5-TTS o Fish Speech) para contenido que se monetiza.
+
+## Criterios de producto
+
+- **Es un producto vendible**: una instalación nueva arranca vacía (sin canales ni datos personales). Los ejemplos van como plantillas de nicho o detrás de `setup --demo`. Nada de nombres propios ("Fe Diaria") en la UI ni en los valores por defecto.
+- **Todo lo que configura el usuario se hace dentro de la app** (Ajustes), nunca editando archivos. `.env` es solo para desarrollo.
+- **Hardware**: se desarrolla en una laptop sin NVIDIA (Intel Iris Xe → render con QSV, Whisper en CPU). La RTX 3050 de 4 GB está en otra PC: las rutas NVENC/CUDA hay que probarlas ahí.
+- **Agentes**: `.claude/agents/` define un agente por área (`hefesto-queue`, `hefesto-api`, `hefesto-web`, `hefesto-data`, `hefesto-providers`, `hefesto-media`) con su modelo y nivel de razonamiento. Antes de lanzarlos en paralelo, fijá el contrato (`libs/shared/types/src/lib/api.ts`) y hacé vos las migraciones.
+- **Estado y pendientes**: ver [docs/10-roadmap.md](docs/10-roadmap.md) (sección "Estado actual").

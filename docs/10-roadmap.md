@@ -15,6 +15,20 @@ Estimaciones para un desarrollador con asistencia de IA, a ritmo constante de me
 
 ---
 
+## Estado actual (25-09-2026)
+
+Avance: MVP (fases 0–2) ≈ 88 % · proyecto completo ≈ 35 %.
+
+Pendientes para retomar:
+- [ ] Revisar a mano en el navegador **Biblioteca, Ideas y guiones y Hoy** (compilan, no se revisaron visualmente; el agente se detuvo al terminar).
+- [ ] Primer video real con claves de Gemini y Pexels (`npx nx run api:cli keys set GEMINI_API_KEY`).
+- [ ] Probar en la PC con la RTX 3050: NVENC, whisper.cpp CUDA y el modelo `large-v3-turbo` (`tools/fetch-binaries.ts` elige solo).
+- [ ] Pantalla Ajustes en pen.dev: los campos de clave todavía dicen ".env" (debe decir "cifrada").
+- [ ] Recortar CSS de `producir-page` y `hoy-page` (superan el presupuesto de 4 kB por componente; solo advertencia).
+- [ ] Endpoint de reintento masivo en la cola (hoy la UI reintenta de a uno).
+- [ ] Luego: Fase 3 (Google Drive).
+
+
 ## Fase 0 · Planificación y diseño
 - [x] Visión, arquitectura, modelo de datos y pipeline documentados
 - [ ] Confirmar experiencia previa con Angular y Nest (define el ritmo de las fases 1–2)
