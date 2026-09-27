@@ -110,6 +110,7 @@ export interface SubtitleStyle {
   fontSize: number;
   primaryColor: string;
   highlightColor: string;
+  outlineColor: string;
   uppercase: boolean;
 }
 

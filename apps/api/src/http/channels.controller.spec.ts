@@ -1,8 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
+import { DEFAULT_BRAND_KIT } from '@hefesto/shared-types';
 import { createTestDb } from '../db/test-utils';
 import { ChannelsRepository, CostEntriesRepository, ProductionsRepository } from '../db/repositories';
 import { InMemoryBindingSource, ProviderRegistry } from '../providers/provider-registry';
 import { ChannelsController } from './channels.controller';
+import { channelPatchSchema } from './common/schemas';
 
 const CHANNEL_INPUT = {
   name: 'Canal Test',
@@ -55,6 +57,29 @@ describe('ChannelsController', () => {
     controller.remove(created.id);
     const afterDelete = controller.getBySlug('canal-test');
     expect(afterDelete.active).toBe(false);
+  });
+
+  it('defaults the brand kit on create and stores an edited one', () => {
+    const { controller } = buildController();
+    const created = controller.create(CHANNEL_INPUT);
+    expect(created.brandKit).toEqual(DEFAULT_BRAND_KIT);
+
+    const kit = { ...DEFAULT_BRAND_KIT, highlightColor: '#39FF88', subtitleSize: 96, uppercase: false };
+    expect(controller.update(created.id, { brandKit: kit }).brandKit).toEqual(kit);
+    expect(controller.getBySlug('canal-test').brandKit).toEqual(kit);
+  });
+
+  it('rejects brand kits the renderer cannot draw', () => {
+    const ok = channelPatchSchema.safeParse({ brandKit: DEFAULT_BRAND_KIT });
+    expect(ok.success).toBe(true);
+    for (const bad of [
+      { subtitleFont: 'Comic Sans' },
+      { highlightColor: 'amarillo' },
+      { textColor: '#FFF' },
+      { subtitleSize: 400 },
+    ]) {
+      expect(channelPatchSchema.safeParse({ brandKit: { ...DEFAULT_BRAND_KIT, ...bad } }).success).toBe(false);
+    }
   });
 
   it('throws 404 for an unknown channel', () => {

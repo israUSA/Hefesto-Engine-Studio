@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { Motion, Platform, VisualSource } from '@hefesto/shared-types';
+import { DEFAULT_BRAND_KIT, type BrandKit, type Motion, type Platform, type VisualSource } from '@hefesto/shared-types';
 import { Button, Icon, Input, Select, SelectOption, Skeleton } from '@hefesto/web-ui';
 import { ApiClient } from '../../../core/api-client';
 import { ToastService } from '../../../core/toast.service';
+import { BrandKitEditor } from './brand-kit-editor';
 import { ChannelDetailStore } from './channel-detail.store';
 
 const PLATFORMS: SelectOption[] = [
@@ -24,11 +25,11 @@ const MOTIONS: SelectOption[] = [
   { value: 'static', label: 'Estático' },
 ];
 
-/** Channel identity: brand voice, "biblia del canal", target duration and visual style. */
+/** Channel identity: brand voice, "biblia del canal", target duration, visual style and brand kit. */
 @Component({
   selector: 'hf-identidad-tab',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, Button, Icon, Input, Select, Skeleton],
+  imports: [FormsModule, Button, Icon, Input, Select, Skeleton, BrandKitEditor],
   templateUrl: './identidad-tab.html',
   styleUrl: './identidad-tab.css',
 })
@@ -58,6 +59,8 @@ export class IdentidadTab {
   motion: Motion = 'kenburns';
   basePrompt = '';
 
+  readonly brandKit = signal<BrandKit>(DEFAULT_BRAND_KIT);
+
   readonly saving = signal(false);
   readonly previewing = signal(false);
   readonly previewAudioUrl = signal<string | null>(null);
@@ -81,6 +84,7 @@ export class IdentidadTab {
         this.visualSource = channel.visualStyle.source;
         this.motion = channel.visualStyle.motion;
         this.basePrompt = channel.visualStyle.basePrompt ?? '';
+        this.brandKit.set(channel.brandKit);
       }
     });
   }
@@ -112,6 +116,7 @@ export class IdentidadTab {
           motion: this.motion,
           basePrompt: this.basePrompt.trim() || undefined,
         },
+        brandKit: this.brandKit(),
       })
       .subscribe({
         next: () => {

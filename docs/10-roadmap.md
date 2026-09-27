@@ -17,7 +17,7 @@ Estimaciones para un desarrollador con asistencia de IA, a ritmo constante de me
 
 ## Estado actual (27-09-2026)
 
-Avance: MVP (fases 0–2) ≈ 93 % · proyecto completo ≈ 37 %.
+Avance: MVP (fases 0–2) ≈ 96 % (Fase 2 completa; falta el primer video con claves reales) · proyecto completo ≈ 39 %.
 
 Hecho el 27-09 (revisión de la Fase 2 en el navegador, modo `--offline`):
 - [x] Revisadas a mano todas las pantallas; flujo completo idea → guion → aprobar → producir → cola → biblioteca.
@@ -27,9 +27,11 @@ Hecho el 27-09 (revisión de la Fase 2 en el navegador, modo `--offline`):
 - [x] Endpoint `POST /api/queue/retry-failed` y `QueueState.retryableCount` (solo cuenta fallos no superados).
 - [x] CSS de `producir-page` y `hoy-page` dentro del presupuesto (se extrajeron componentes).
 - [x] `nx run api:serve` recompila en caliente (el executor `@nx/js:node` chocaba con el chequeo de tareas recursivas de Nx 23).
+- [x] **Brand kit** de subtítulos (fuente, tamaño, colores, mayúsculas) en Canal → Identidad, con vista previa y aplicado al render (ver [03](03-modelo-de-datos.md)). Las plantillas de nicho traen el suyo.
+- [x] Dependencias explícitas entre etapas: las imágenes dependen solo del guion, así que un cambio de voz o de brand kit ya no vuelve a bajar (ni a pagar) el stock.
 
 Pendientes para retomar:
-- [ ] **Brand kit** del canal (ver [03](03-modelo-de-datos.md)): no existe en la base ni en la UI. Mínimo para cerrar la Fase 2: fuente y colores de subtítulos aplicados al `subs.ass`, editables en Canal → Identidad. Watermark, intro/outro y música quedan para la Fase 4.
+- [ ] Más fuentes OFL para subtítulos en `data/fonts` (hoy solo Archivo Black; se agregan al catálogo `SUBTITLE_FONTS`).
 - [ ] Primer video real con claves de Gemini y Pexels (`npx nx run api:cli keys set GEMINI_API_KEY`).
 - [ ] Probar en la PC con la RTX 3050: NVENC, whisper.cpp CUDA y el modelo `large-v3-turbo` (`tools/fetch-binaries.ts` elige solo).
 - [ ] En la laptop (Intel Iris Xe) el render sale con `libx264`, no con QSV: revisar la detección del codificador.
@@ -63,7 +65,7 @@ Objetivo: **un comando que produce un short completo** para un canal.
 
 ## Fase 2 · App base
 - [x] `apps/web` Angular con el design system implementado
-- [ ] CRUD de canales con brand kit, perfil de voz ("probar voz") y estilo visual (falta el brand kit)
+- [x] CRUD de canales con brand kit, perfil de voz ("probar voz") y estilo visual
 - [x] Ideas y guiones con kanban de aprobación
 - [x] Cola persistente (lanes GPU, red y CPU), pausar, saltar, detener, reintentar (uno o todos)
 - [x] Barra de producción en vivo (WebSocket), consola de logs

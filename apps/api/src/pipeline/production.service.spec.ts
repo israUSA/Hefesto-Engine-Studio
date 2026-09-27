@@ -1,5 +1,5 @@
 import type { Channel, ProductionStage, ProviderConfig, RunStatus, StageKey, WordTiming } from '@hefesto/shared-types';
-import { STAGE_ORDER } from '@hefesto/shared-types';
+import { DEFAULT_BRAND_KIT, STAGE_ORDER } from '@hefesto/shared-types';
 import { copyFileSync, existsSync, rmSync, writeFileSync } from 'node:fs';
 import { InMemoryBindingSource, ProviderRegistry } from '../providers';
 import { fakeProviderFactory } from '../providers/adapters/fake';
@@ -47,6 +47,7 @@ const CHANNEL: Channel = {
   active: true,
   voice: { voiceId: 'Kore', language: 'es' },
   visualStyle: { source: 'stock', motion: 'kenburns' },
+  brandKit: DEFAULT_BRAND_KIT,
 };
 
 type Row = ProductionRecord & { currentStep?: StageKey | null; progress?: number; error?: string; scriptId?: string };
@@ -216,21 +217,51 @@ describe('ProductionService (per-stage pipeline)', () => {
     expect(calls).toEqual([]);
   });
 
-  it('a change upstream re-runs that stage and every stage after it', async () => {
+  it('a change upstream re-runs that stage and the stages that depend on it', async () => {
     const { productionId } = await svc.produce(CHANNEL.slug);
     (store.channels.get(CHANNEL.id) as Channel).voice.speed = 1.1;
 
     const skipped: Record<string, boolean> = {};
     for (const stage of STAGE_ORDER) skipped[stage] = (await svc.runStage({ productionId }, stage)).skipped;
+    // Scene images depend only on the script: a new voice keeps them.
     expect(skipped).toEqual({
       script: true,
       voice: false,
       transcribe: false,
       subtitles: false,
-      visuals: false,
+      visuals: true,
       render: false,
       qa: false,
     });
+  });
+
+  it('a new script re-runs every stage, visuals included', async () => {
+    const { productionId } = await svc.produce(CHANNEL.slug);
+    (store.channels.get(CHANNEL.id) as Channel).bible = 'Tono enérgico.';
+
+    const skipped: Record<string, boolean> = {};
+    for (const stage of STAGE_ORDER) skipped[stage] = (await svc.runStage({ productionId }, stage)).skipped;
+    expect(Object.values(skipped)).toEqual(STAGE_ORDER.map(() => false));
+  });
+
+  it('a brand kit change re-draws the subtitles and re-renders, without touching voice or visuals', async () => {
+    const { productionId } = await svc.produce(CHANNEL.slug);
+    (store.channels.get(CHANNEL.id) as Channel).brandKit = { ...DEFAULT_BRAND_KIT, highlightColor: '#39FF88', subtitleSize: 96 };
+    const write = jest.spyOn(media, 'writeSubtitles');
+
+    const skipped: Record<string, boolean> = {};
+    for (const stage of STAGE_ORDER) skipped[stage] = (await svc.runStage({ productionId }, stage)).skipped;
+    expect(skipped).toEqual({
+      script: true,
+      voice: true,
+      transcribe: true,
+      subtitles: false,
+      visuals: true,
+      render: false,
+      qa: false,
+    });
+    expect(write.mock.calls[0][1]).toMatchObject({ highlightColor: '#39FF88', fontSize: 96, fontName: 'Archivo Black' });
+    write.mockRestore();
   });
 
   it('resetFrom forces a stage and the later ones to re-run', async () => {

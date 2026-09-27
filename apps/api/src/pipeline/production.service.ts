@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   STAGE_ORDER,
+  type BrandKit,
   type Channel,
   type ProductionStage,
   type RunStatus,
@@ -98,13 +99,17 @@ interface QaCheck {
   threshold: string;
 }
 
-const DEFAULT_SUBTITLE_STYLE: SubtitleStyle = {
-  fontName: 'Archivo Black',
-  fontSize: 84,
-  primaryColor: '#FFFFFF',
-  highlightColor: '#FFD23F',
-  uppercase: true,
-};
+/** The channel's brand kit as the subtitles stage sees it (also part of its input hash). */
+export function subtitleStyleFor(kit: BrandKit): SubtitleStyle {
+  return {
+    fontName: kit.subtitleFont,
+    fontSize: kit.subtitleSize,
+    primaryColor: kit.textColor,
+    highlightColor: kit.highlightColor,
+    outlineColor: kit.outlineColor,
+    uppercase: kit.uppercase,
+  };
+}
 
 const MAX_WER = 0.08;
 const TARGET_LUFS = -14;
@@ -365,8 +370,9 @@ class StageRun {
   }
 
   /**
-   * Idempotent stage: its hash chains the previous stage's stored hash, so changing
-   * anything upstream re-runs this stage and every stage after it. Returns true if skipped.
+   * Idempotent stage: its hash chains the stored hashes of the stages it depends on
+   * (by default the previous one), so changing anything upstream re-runs this stage and
+   * every stage that depends on it. Returns true if skipped.
    */
   private async stage(
     key: StageKey,
@@ -374,9 +380,11 @@ class StageRun {
     inputs: unknown,
     outputs: string[],
     body: () => Promise<void>,
+    deps?: StageKey[],
   ): Promise<boolean> {
     this.opts.signal?.throwIfAborted();
-    const prev = this.stageIdx > 0 ? (this.production.inputHashes[STAGE_ORDER[this.stageIdx - 1]] ?? '') : '';
+    const after = deps ?? (this.stageIdx > 0 ? [STAGE_ORDER[this.stageIdx - 1]] : []);
+    const prev = after.map((k) => this.production.inputHashes[k] ?? '').join('|');
     const hash = inputHash({ prev, key, inputs });
     const upToDate =
       !this.opts.force &&
@@ -524,7 +532,7 @@ class StageRun {
   // ── 4b · Subtítulos ─────────────────────────────────────────────────────
 
   private async subtitlesStage(): Promise<boolean> {
-    const style = DEFAULT_SUBTITLE_STYLE;
+    const style = subtitleStyleFor(this.channel.brandKit);
     return this.stage('subtitles', null, { style, format: this.channel.format }, ['subs.ass'], async () =>
       this.d.media.writeSubtitles(await this.words(), style, this.channel.format, this.file('subs.ass')),
     );
@@ -558,14 +566,23 @@ class StageRun {
       provider: await this.d.providers.describe('stock', this.scope()),
     };
 
-    return this.stage('visuals', 'visuals_ready', inputs, sceneFiles, async () => {
-      const used = new Set<string>();
-      for (const [i, scene] of script.scenes.entries()) {
-        this.opts.signal?.throwIfAborted();
-        await this.downloadSceneImage(scene.keywords, this.file(sceneFiles[i]), used, scene.visualPrompt);
-        this.progress('visuals', (i + 1) / script.scenes.length);
-      }
-    });
+    // Scene images come from the script alone: a new voice or brand kit must not re-download
+    // (or re-pay for) them.
+    return this.stage(
+      'visuals',
+      'visuals_ready',
+      inputs,
+      sceneFiles,
+      async () => {
+        const used = new Set<string>();
+        for (const [i, scene] of script.scenes.entries()) {
+          this.opts.signal?.throwIfAborted();
+          await this.downloadSceneImage(scene.keywords, this.file(sceneFiles[i]), used, scene.visualPrompt);
+          this.progress('visuals', (i + 1) / script.scenes.length);
+        }
+      },
+      ['script'],
+    );
   }
 
   /** Tries the scene keywords, then fewer keywords, then a generic query. Avoids repeating a photo. */
@@ -607,30 +624,38 @@ class StageRun {
     const clips = await this.clips();
     const inputs = { clips: clips.map((c) => [c.startMs, c.endMs]), format: this.channel.format };
 
-    return this.stage('render', 'rendered', inputs, ['render.mp4', 'thumb.jpg'], async () => {
-      const { encoder } = await this.d.media.render(
-        {
-          scenes: clips,
-          voicePath: this.file('voice.wav'),
-          subsPath: this.file('subs.ass'),
-          format: this.channel.format,
-          outPath: this.file('render.mp4'),
-        },
-        { signal: this.opts.signal, onProgress: (value) => this.progress('render', value) },
-      );
-      await this.d.media.thumbnail(this.file('render.mp4'), this.file('thumb.jpg'), 1200);
-      const durationMs = await this.d.media.probeDurationMs(this.file('render.mp4'));
-      await this.d.store.setRender(this.id, this.file('render.mp4'), durationMs);
-      this.emit({ type: 'info', productionId: this.id, message: `Render con ${encoder}` });
-      for (const [kind, name] of [['render', 'render.mp4'], ['thumb', 'thumb.jpg']] as const) {
-        await this.d.store.recordAsset({
-          productionId: this.id,
-          kind,
-          localPath: this.file(name),
-          inputHash: inputHash(inputs),
-        });
-      }
-    });
+    // Re-renders when the subtitles (voice, words, brand kit) or the scene images change.
+    return this.stage(
+      'render',
+      'rendered',
+      inputs,
+      ['render.mp4', 'thumb.jpg'],
+      async () => {
+        const { encoder } = await this.d.media.render(
+          {
+            scenes: clips,
+            voicePath: this.file('voice.wav'),
+            subsPath: this.file('subs.ass'),
+            format: this.channel.format,
+            outPath: this.file('render.mp4'),
+          },
+          { signal: this.opts.signal, onProgress: (value) => this.progress('render', value) },
+        );
+        await this.d.media.thumbnail(this.file('render.mp4'), this.file('thumb.jpg'), 1200);
+        const durationMs = await this.d.media.probeDurationMs(this.file('render.mp4'));
+        await this.d.store.setRender(this.id, this.file('render.mp4'), durationMs);
+        this.emit({ type: 'info', productionId: this.id, message: `Render con ${encoder}` });
+        for (const [kind, name] of [['render', 'render.mp4'], ['thumb', 'thumb.jpg']] as const) {
+          await this.d.store.recordAsset({
+            productionId: this.id,
+            kind,
+            localPath: this.file(name),
+            inputHash: inputHash(inputs),
+          });
+        }
+      },
+      ['subtitles', 'visuals'],
+    );
   }
 
   // ── 7 · QA (subset de Fase 1) ───────────────────────────────────────────

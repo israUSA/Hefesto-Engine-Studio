@@ -162,6 +162,7 @@ export function seedDemoChannels(db: DbInstance): Channel[] {
       active: true,
       voice: d.voice ?? { voiceId: 'Kore', language: 'es' },
       visualStyle: d.visualStyle ?? { source: 'stock', motion: 'kenburns' },
+      brandKit: d.brandKit,
     });
   });
 }

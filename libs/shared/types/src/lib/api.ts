@@ -3,7 +3,7 @@
  * REST lives under `/api`, live events under the WebSocket `/ws`.
  * Change this file first, then both sides.
  */
-import type { Channel, Platform, ProductionStage, RunStatus, VerseRef } from './domain';
+import type { BrandKit, Channel, Platform, ProductionStage, RunStatus, VerseRef } from './domain';
 import type {
   Capability,
   HealthResult,
@@ -21,7 +21,15 @@ import type {
 // DELETE /api/channels/:id             → 204 (soft: active = false)
 // POST   /api/channels/:id/voice-preview  VoicePreviewRequest → VoicePreviewResponse
 
-export type ChannelInput = Omit<Channel, 'id'>;
+/** `brandKit` is optional on input: a missing one means DEFAULT_BRAND_KIT. */
+export type ChannelInput = Omit<Channel, 'id' | 'brandKit'> & { brandKit?: BrandKit };
+
+// GET    /api/fonts                     → FontDto[]   (subtitle fonts available to the renderer)
+// GET    /api/fonts/:file               → the font file (for the Identidad preview)
+export interface FontDto {
+  family: string;
+  url: string;
+}
 
 // GET    /api/channel-templates         → ChannelTemplateDto[]
 // The product ships with no channels: the user starts blank or from a niche template.

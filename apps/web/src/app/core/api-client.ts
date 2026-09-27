@@ -7,6 +7,7 @@ import type {
   ChannelInput,
   ChannelSummary,
   ChannelTemplateDto,
+  FontDto,
   GenerateIdeasRequest,
   GenerateScriptRequest,
   IdeaDto,
@@ -57,6 +58,10 @@ export class ApiClient {
 
   createChannel(input: ChannelInput): Observable<Channel> {
     return this.http.post<Channel>(`${this.base}/channels`, input);
+  }
+
+  listFonts(): Observable<FontDto[]> {
+    return this.http.get<FontDto[]>(`${this.base}/fonts`);
   }
 
   updateChannel(id: string, patch: Partial<ChannelInput>): Observable<Channel> {

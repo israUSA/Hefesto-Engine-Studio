@@ -2,7 +2,7 @@ import type { ChannelTemplateDto } from '@hefesto/shared-types';
 
 /**
  * Niche templates offered when creating a channel. They pre-fill the
- * "biblia del canal", voice and visual style; the user names the channel.
+ * "biblia del canal", voice, visual style and brand kit; the user names the channel.
  * A fresh install has no channels (the product ships empty).
  */
 export const CHANNEL_TEMPLATES: ChannelTemplateDto[] = [
@@ -30,6 +30,14 @@ export const CHANNEL_TEMPLATES: ChannelTemplateDto[] = [
         negativePrompt: 'rostros generados por IA, texto en la imagen',
         motion: 'kenburns',
       },
+      brandKit: {
+        subtitleFont: 'Archivo Black',
+        subtitleSize: 84,
+        textColor: '#FFFFFF',
+        highlightColor: '#FFD23F',
+        outlineColor: '#000000',
+        uppercase: true,
+      },
     },
   },
   {
@@ -56,6 +64,14 @@ export const CHANNEL_TEMPLATES: ChannelTemplateDto[] = [
         negativePrompt: 'rostros generados por IA, texto en la imagen',
         motion: 'kenburns',
       },
+      brandKit: {
+        subtitleFont: 'Archivo Black',
+        subtitleSize: 80,
+        textColor: '#FFFFFF',
+        highlightColor: '#9FD8FF',
+        outlineColor: '#000000',
+        uppercase: false,
+      },
     },
   },
   {
@@ -79,6 +95,14 @@ export const CHANNEL_TEMPLATES: ChannelTemplateDto[] = [
         basePrompt: 'consolas retro, joysticks, luces neón, setups gamer, pixel art genérico',
         negativePrompt: 'personajes, logos o arte de franquicias con derechos de autor',
         motion: 'kenburns',
+      },
+      brandKit: {
+        subtitleFont: 'Archivo Black',
+        subtitleSize: 92,
+        textColor: '#FFFFFF',
+        highlightColor: '#39FF88',
+        outlineColor: '#000000',
+        uppercase: true,
       },
     },
   },
@@ -104,6 +128,14 @@ export const CHANNEL_TEMPLATES: ChannelTemplateDto[] = [
         negativePrompt: 'rostros generados por IA',
         motion: 'kenburns',
       },
+      brandKit: {
+        subtitleFont: 'Archivo Black',
+        subtitleSize: 96,
+        textColor: '#FFFFFF',
+        highlightColor: '#FF5A1F',
+        outlineColor: '#000000',
+        uppercase: true,
+      },
     },
   },
   {
@@ -127,6 +159,14 @@ export const CHANNEL_TEMPLATES: ChannelTemplateDto[] = [
         basePrompt: 'naturaleza, espacio, laboratorios, mapas antiguos, macrofotografía',
         negativePrompt: 'texto en la imagen',
         motion: 'kenburns',
+      },
+      brandKit: {
+        subtitleFont: 'Archivo Black',
+        subtitleSize: 88,
+        textColor: '#FFFFFF',
+        highlightColor: '#4DD0E1',
+        outlineColor: '#000000',
+        uppercase: true,
       },
     },
   },

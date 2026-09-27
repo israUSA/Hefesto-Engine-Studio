@@ -45,6 +45,8 @@ Channel ─┬─< Idea ──< Script ──< Scene
 ### BrandKit
 Fuente de títulos y subtítulos, colores (primario, resaltado), estilo de subtítulos (preset ASS), watermark (imagen, posición, opacidad), intro y outro opcionales, pack de música (lista de pistas y volumen), plantilla de miniatura.
 
+**Implementado (Fase 2)**: JSON `channels.brand_kit` con `subtitleFont` (una de `SUBTITLE_FONTS`, archivos OFL en `data/fonts`), `subtitleSize` (56–120 px sobre 1080×1920), `textColor`, `highlightColor` (palabra activa), `outlineColor` y `uppercase`. Un canal sin brand kit usa `DEFAULT_BRAND_KIT`. Se edita en Canal → Identidad con vista previa y entra en el hash de la etapa de subtítulos: cambiarlo rehace subtítulos y render, no la voz ni las imágenes. Watermark, intro/outro, música y miniatura quedan para la Fase 4.
+
 ### VoiceProfile
 `providerConfigId`, `voiceId`, `language`, `stylePrompt` (Gemini TTS: "cálida, pausada, reverente"), `speed`, `pauseBeforeAmenMs` y otros parámetros específicos del proveedor en JSON. Los valores del canal **se aplican encima** de los valores base, como en ZAP.
 

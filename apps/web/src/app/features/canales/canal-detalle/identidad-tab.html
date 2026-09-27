@@ -105,6 +105,11 @@
       </div>
     </section>
 
+    <section class="hf-identidad__section">
+      <h3 class="hf-identidad__heading">Brand kit · subtítulos</h3>
+      <hf-brand-kit-editor [(kit)]="brandKit" />
+    </section>
+
     <div class="hf-identidad__actions">
       <hf-button variant="primary" [loading]="saving()" (pressed)="save()">
         <hf-icon name="check" [size]="14" />

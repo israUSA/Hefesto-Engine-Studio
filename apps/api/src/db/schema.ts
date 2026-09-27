@@ -6,6 +6,7 @@
 import { sql } from 'drizzle-orm';
 import { integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import type {
+  BrandKit,
   Capability,
   HealthResult,
   Platform,
@@ -39,6 +40,8 @@ export const channels = sqliteTable('channels', {
     .notNull(),
   voiceProfile: text('voice_profile', { mode: 'json' }).$type<VoiceProfile>().notNull(),
   visualStyle: text('visual_style', { mode: 'json' }).$type<VisualStyle>().notNull(),
+  /** Null on channels created before the brand kit existed: read as DEFAULT_BRAND_KIT. */
+  brandKit: text('brand_kit', { mode: 'json' }).$type<BrandKit>(),
   driveFolderId: text('drive_folder_id'),
   /** Marks content as AI-generated when publishing. */
   aiLabel: integer('ai_label', { mode: 'boolean' }).notNull().default(true),

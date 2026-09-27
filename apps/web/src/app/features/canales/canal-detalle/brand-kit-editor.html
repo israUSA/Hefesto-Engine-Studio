@@ -1,0 +1,69 @@
+<div class="hf-kit">
+  <div class="hf-kit__controls">
+    <div class="hf-kit__row">
+      <div class="hf-kit__field">
+        <span>Fuente de subtítulos</span>
+        <hf-select
+          [options]="fontOptions()"
+          [ngModel]="kit().subtitleFont"
+          (ngModelChange)="update({ subtitleFont: $event })"
+          ariaLabel="Fuente de subtítulos"
+        />
+      </div>
+      <label class="hf-kit__field">
+        <span>Tamaño · {{ kit().subtitleSize }} px</span>
+        <input
+          type="range"
+          class="hf-kit__range"
+          [min]="sizeRange.min"
+          [max]="sizeRange.max"
+          step="2"
+          [ngModel]="kit().subtitleSize"
+          (ngModelChange)="setSize($event)"
+        />
+      </label>
+    </div>
+
+    <div class="hf-kit__row">
+      @for (field of colorFields; track field.key) {
+        <div class="hf-kit__field">
+          <span>{{ field.label }}</span>
+          <div class="hf-kit__color">
+            <input
+              type="color"
+              class="hf-kit__swatch"
+              [value]="kit()[field.key]"
+              (input)="setColor(field.key, $any($event.target).value)"
+              [attr.aria-label]="'Color: ' + field.label"
+            />
+            <input
+              class="hf-kit__hex"
+              maxlength="7"
+              spellcheck="false"
+              [value]="kit()[field.key]"
+              (change)="setColor(field.key, $any($event.target).value)"
+              [attr.aria-label]="'Código de color: ' + field.label"
+            />
+          </div>
+        </div>
+      }
+    </div>
+
+    <label class="hf-kit__check">
+      <input type="checkbox" [ngModel]="kit().uppercase" (ngModelChange)="update({ uppercase: $event })" />
+      Todo en mayúsculas
+    </label>
+  </div>
+
+  <figure class="hf-kit__preview" aria-label="Vista previa de los subtítulos">
+    <div class="hf-kit__frame">
+      <p class="hf-kit__line" [style]="previewStyle()">
+        @for (word of line(); track $index) {
+          <span [style.color]="word.active ? kit().highlightColor : null">{{ word.text }}</span>
+          {{ ' ' }}
+        }
+      </p>
+    </div>
+    <figcaption>Vista previa · 9:16</figcaption>
+  </figure>
+</div>

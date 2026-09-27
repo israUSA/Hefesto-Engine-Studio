@@ -9,7 +9,9 @@
 Cada etapa:
 1. Calcula el `inputHash` de sus entradas (texto, parámetros, proveedor, versión de la plantilla).
 2. Si la salida existe (en disco **o** en Drive) con el mismo hash, la **salta**.
-3. Si cambió algo (por ejemplo el perfil de voz), solo se rehacen esa etapa y las siguientes.
+3. Si cambió algo (por ejemplo el perfil de voz), solo se rehacen esa etapa y las que dependen de ella.
+
+El hash de cada etapa incluye el de las etapas de las que depende: por defecto la anterior, salvo **Visuales**, que depende solo del **Guion** (un cambio de voz o de brand kit no vuelve a bajar imágenes), y **Render**, que depende de **Subtítulos** y **Visuales**.
 
 Esto permite **"Rehacer escena 3"** o **"Rehacer solo la voz"** sin volver a producir todo.
 
