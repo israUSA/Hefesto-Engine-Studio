@@ -9,55 +9,7 @@
     <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
   </hf-empty-state>
 } @else if (hasNoChannels()) {
-  <div class="hf-onboarding">
-    <span class="hf-onboarding__eyebrow">Primeros pasos</span>
-    <h1 class="hf-onboarding__headline">Forjá tu primer <em>canal</em></h1>
-    <p class="hf-onboarding__lead">
-      Hefesto todavía no tiene canales. Configurá tus proveedores, creá un canal y producí tu primer video.
-    </p>
-
-    @if (missingSecrets()) {
-      <div class="hf-onboarding__warning">
-        <hf-icon name="alert-triangle" [size]="14" />
-        Faltan claves de proveedor. Cargalas antes de producir.
-      </div>
-    }
-
-    <ol class="hf-onboarding__steps">
-      <li>
-        <span class="hf-onboarding__step-num">1</span>
-        <div>
-          <strong>Cargá tus claves</strong>
-          <span>en Ajustes → Proveedores</span>
-        </div>
-      </li>
-      <li>
-        <span class="hf-onboarding__step-num">2</span>
-        <div>
-          <strong>Creá un canal</strong>
-          <span>desde una plantilla de nicho o en blanco</span>
-        </div>
-      </li>
-      <li>
-        <span class="hf-onboarding__step-num">3</span>
-        <div>
-          <strong>Producí tu primer video</strong>
-          <span>elegí el canal y lanzá la tanda</span>
-        </div>
-      </li>
-    </ol>
-
-    <div class="hf-onboarding__actions">
-      <hf-button variant="primary" [routerLink]="['/canales']" [queryParams]="{ nuevo: '1' }">
-        <hf-icon name="plus" [size]="14" />
-        Crear tu primer canal
-      </hf-button>
-      <hf-button variant="secondary" routerLink="/ajustes/proveedores">
-        <hf-icon name="settings" [size]="14" />
-        Ir a Proveedores
-      </hf-button>
-    </div>
-  </div>
+  <hf-hoy-onboarding [missingSecrets]="missingSecrets()" />
 } @else {
   <div class="hf-hoy">
     <div class="hf-hoy__main">
@@ -146,27 +98,7 @@
         </header>
         <div class="hf-channel-rows">
           @for (row of channelRows(); track row.summary.channel.id) {
-            <a class="hf-channel-row" [routerLink]="['/canales', row.summary.channel.slug]">
-              <span class="hf-channel-row__avatar">{{ row.summary.channel.name[0] }}</span>
-              <div class="hf-channel-row__about">
-                <span class="hf-channel-row__name">
-                  {{ row.summary.channel.name }}
-                  <hf-icon [name]="row.platformIcon" [size]="12" />
-                </span>
-                <span class="hf-channel-row__stats">
-                  {{ row.summary.videosThisMonth }} este mes · {{ row.summary.inQueue }} en cola · ${{ row.summary.costThisMonthUsd.toFixed(2) }}
-                </span>
-              </div>
-              <div class="hf-channel-row__thumbs">
-                @if (row.recent.length === 0) {
-                  <span class="hf-channel-row__empty">Sin videos aún</span>
-                } @else {
-                  @for (p of row.recent; track p.id) {
-                    <hf-thumb-9x16 [imageUrl]="p.thumbUrl ?? null" [aiMark]="false" class="hf-channel-row__thumb" />
-                  }
-                }
-              </div>
-            </a>
+            <hf-hoy-channel-row [row]="row" />
           }
         </div>
       </section>

@@ -16,6 +16,8 @@ import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap } fr
 import { ApiClient } from '../../core/api-client';
 import { LiveEvents } from '../../core/live-events';
 import { ToastService } from '../../core/toast.service';
+import { AVATAR_TONES, ChannelPickCard, type ChannelVm } from './channel-pick-card';
+import { ProduceSummary, type ChannelShare, type LaneShare } from './produce-summary';
 
 type Mode = 'new' | 'approved';
 type Priority = -1 | 0 | 1;
@@ -32,30 +34,6 @@ const STAGE_LABEL: Record<StageKey, string> = {
 
 const LANE_LABEL: Record<Lane, string> = { gpu: 'GPU', net: 'Red', cpu: 'CPU' };
 const LANE_CLASS: Record<Lane, string> = { gpu: 'gpu', net: 'net', cpu: 'cpu' };
-const AVATAR_TONES = ['accent', 'ok', 'warn', 'steel'] as const;
-
-interface ChannelVm {
-  summary: ChannelSummary;
-  initial: string;
-  tone: (typeof AVATAR_TONES)[number];
-  approvedCount: number;
-}
-
-interface LaneShare {
-  lane: Lane;
-  label: string;
-  cssClass: string;
-  jobs: number;
-  pct: number;
-}
-
-interface ChannelShare {
-  channelId: string;
-  name: string;
-  videos: number;
-  minutes: number;
-  costUsd: number;
-}
 
 type EstimateResult = { kind: 'idle' } | { kind: 'ok'; estimate: ProduceEstimate } | { kind: 'error' };
 
@@ -66,7 +44,7 @@ type EstimateResult = { kind: 'idle' } | { kind: 'ok'; estimate: ProduceEstimate
 @Component({
   selector: 'hf-producir-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, Button, EmptyState, Icon, Input, Skeleton],
+  imports: [FormsModule, RouterLink, Button, EmptyState, Icon, Input, Skeleton, ChannelPickCard, ProduceSummary],
   templateUrl: './producir-page.html',
   styleUrl: './producir-page.css',
 })

@@ -1,0 +1,111 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-width: 560px;
+  margin: var(--space-10) auto;
+  text-align: left;
+}
+
+.hf-onboarding__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.hf-onboarding__headline {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-display);
+  font-weight: 400;
+  color: var(--text);
+}
+
+.hf-onboarding__headline em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.hf-onboarding__lead {
+  margin: 0;
+  color: var(--text-3);
+  font-size: var(--text-base);
+  max-width: 48ch;
+}
+
+.hf-onboarding__warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--warn);
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: var(--text-sm);
+}
+
+.hf-onboarding__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.hf-onboarding__steps li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.hf-onboarding__step-num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.hf-onboarding__steps div {
+  display: flex;
+  flex-direction: column;
+}
+
+.hf-onboarding__steps strong {
+  color: var(--text);
+  font-weight: 500;
+  font-size: var(--text-base);
+}
+
+.hf-onboarding__steps span {
+  color: var(--text-3);
+  font-size: var(--text-sm);
+}
+
+.hf-onboarding__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 1100px) {
+  .hf-hoy {
+    grid-template-columns: 1fr;
+  }
+  .hf-hoy__aside {
+    position: static;
+  }
+}
