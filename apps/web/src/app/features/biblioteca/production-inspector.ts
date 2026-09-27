@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { ProductionDetail, StageKey } from '@hefesto/shared-types';
+import type { ProductionDetail, ScriptStatus, StageKey } from '@hefesto/shared-types';
 import { STAGE_ORDER } from '@hefesto/shared-types';
 import { Button, Dialog, EmptyState, Icon, Select, SelectOption, Skeleton, StatusChip, Tag } from '@hefesto/web-ui';
 import { ApiClient } from '../../core/api-client';
 import { LiveEvents } from '../../core/live-events';
+import { productionStatus } from '../../core/production-status';
 import { ToastService } from '../../core/toast.service';
 
 const STAGE_LABEL: Record<StageKey, string> = {
@@ -17,7 +18,13 @@ const STAGE_LABEL: Record<StageKey, string> = {
   qa: 'QA',
 };
 
-type StageState = 'pending' | 'running' | 'done' | 'skipped' | 'failed';
+const SCRIPT_STATUS_LABEL: Record<ScriptStatus, string> = {
+  draft: 'Borrador',
+  approved: 'Aprobado',
+  rejected: 'Rechazado',
+};
+
+type StageState ='pending' | 'running' | 'done' | 'skipped' | 'failed';
 
 function stageTone(state: StageState): 'ok' | 'accent' | 'danger' | 'steel' | 'neutral' {
   if (state === 'done') return 'ok';
@@ -79,6 +86,12 @@ export class ProductionInspector {
 
   formatDuration = formatDuration;
   stageTone = stageTone;
+
+  statusOf = productionStatus;
+
+  scriptStatusLabel(status: ScriptStatus): string {
+    return SCRIPT_STATUS_LABEL[status] ?? status;
+  }
 
   stageLabel(key: StageKey): string {
     return STAGE_LABEL[key] ?? key;

@@ -30,9 +30,7 @@
     <div class="hf-inspector__meta">
       <div class="hf-inspector__meta-row">
         <span>Estado</span>
-        <hf-status-chip [tone]="d.status === 'failed' ? 'danger' : d.status === 'running' ? 'accent' : d.qaPassed === false ? 'warn' : 'ok'" [pulse]="d.status === 'running'">
-          {{ d.status === 'failed' ? 'Falló' : d.status === 'running' ? 'Forjando' : d.qaPassed === false ? 'Revisar' : d.status === 'done' ? 'Listo' : 'Pendiente' }}
-        </hf-status-chip>
+        <hf-status-chip [tone]="statusOf(d).tone" [pulse]="d.status === 'running'">{{ statusOf(d).label }}</hf-status-chip>
       </div>
       @if (qaSummary(); as qa) {
         <div class="hf-inspector__meta-row">
@@ -50,7 +48,7 @@
       </div>
       <div class="hf-inspector__meta-row">
         <span>Guion</span>
-        <hf-tag [tone]="d.script.status === 'approved' ? 'accent' : 'neutral'">{{ d.script.status }}</hf-tag>
+        <hf-tag [tone]="d.script.status === 'approved' ? 'accent' : 'neutral'">{{ scriptStatusLabel(d.script.status) }}</hf-tag>
       </div>
     </div>
 

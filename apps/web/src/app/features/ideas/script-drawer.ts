@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { ScriptDto, VerseRef } from '@hefesto/shared-types';
 import { Button, EmptyState, Icon, Skeleton, StatusChip, Tag } from '@hefesto/web-ui';
@@ -46,11 +46,12 @@ export class ScriptDrawer {
   body = '';
   cta = '';
 
-  readonly dirty = computed(() => {
+  /** A plain method, not a `computed`: the form fields are ngModel properties, not signals. */
+  dirty(): boolean {
     const s = this.script();
     if (!s) return false;
     return s.title !== this.title || s.hook !== this.hook || s.body !== this.body || s.cta !== this.cta;
-  });
+  }
 
   formatVerseRef = formatVerseRef;
   formatDuration = formatDuration;

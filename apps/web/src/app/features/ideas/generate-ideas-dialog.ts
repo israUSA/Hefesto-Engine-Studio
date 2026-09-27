@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { ChannelSummary } from '@hefesto/shared-types';
 import { Button, Dialog, Input, Select, SelectOption } from '@hefesto/web-ui';
@@ -52,6 +52,8 @@ export class GenerateIdeasDialog {
 
   readonly open = input(false);
   readonly channels = input<ChannelSummary[]>([]);
+  /** Channel to preselect (e.g. the board filter); falls back to the first channel. */
+  readonly defaultChannelId = input('');
   readonly closed = output<void>();
   readonly created = output<void>();
 
@@ -61,6 +63,19 @@ export class GenerateIdeasDialog {
 
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
+
+  constructor() {
+    // A native <select> shows its first option even when the model is empty, which left
+    // "Generar" disabled with a channel visibly picked. Keep the model on a real channel.
+    effect(() => {
+      if (!this.open()) return;
+      const ids = this.channels().map((c) => c.channel.id);
+      const preferred = this.defaultChannelId();
+      if (preferred && ids.includes(preferred)) this.channelId = preferred;
+      else if (!ids.includes(this.channelId)) this.channelId = ids[0] ?? '';
+      this.error.set(null);
+    });
+  }
 
   readonly channelOptions = () => this.channels().map((c) => ({ value: c.channel.id, label: c.channel.name }) satisfies SelectOption);
 

@@ -2,31 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import type { ProductionSummary } from '@hefesto/shared-types';
 import { EmptyState, Skeleton, StatusChip, Thumb9x16 } from '@hefesto/web-ui';
 import { ApiClient } from '../../../core/api-client';
+import { productionStatus } from '../../../core/production-status';
 import { ChannelDetailStore } from './channel-detail.store';
-
-type StatusTone = 'ok' | 'warn' | 'danger' | 'steel' | 'accent' | 'neutral';
-
-function statusLabel(p: ProductionSummary): { label: string; tone: StatusTone } {
-  if (p.status === 'failed') {
-    return { label: 'Falló', tone: 'danger' };
-  }
-  if (p.status === 'running') {
-    return { label: 'Forjando', tone: 'accent' };
-  }
-  if (p.qaPassed === false) {
-    return { label: 'Con fallo QA', tone: 'danger' };
-  }
-  if (p.stage === 'published') {
-    return { label: 'Publicado', tone: 'ok' };
-  }
-  if (p.stage === 'scheduled') {
-    return { label: 'Programado', tone: 'steel' };
-  }
-  if (p.status === 'done') {
-    return { label: 'Listo', tone: 'ok' };
-  }
-  return { label: 'Pendiente', tone: 'neutral' };
-}
 
 function formatDuration(ms?: number): string {
   if (!ms) {
@@ -110,7 +87,7 @@ export class VideosTab {
   }
 
   formatDuration = formatDuration;
-  statusOf = statusLabel;
+  statusOf = productionStatus;
 
   private load(channelId: string): void {
     this.loading.set(true);

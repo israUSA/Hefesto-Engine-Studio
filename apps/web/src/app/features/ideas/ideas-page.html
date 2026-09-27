@@ -109,7 +109,7 @@
   }
 </div>
 
-<hf-generate-ideas-dialog [open]="generateOpen()" [channels]="channels()" (closed)="closeGenerateDialog()" (created)="onIdeasGenerated()" />
+<hf-generate-ideas-dialog [open]="generateOpen()" [channels]="channels()" [defaultChannelId]="channelFilter()"(closed)="closeGenerateDialog()" (created)="onIdeasGenerated()" />
 
 @if (openScriptId(); as id) {
   <hf-script-drawer [scriptId]="id" (closed)="closeScript()" (updated)="onScriptUpdated()" />
