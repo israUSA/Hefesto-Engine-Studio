@@ -15,17 +15,25 @@ Estimaciones para un desarrollador con asistencia de IA, a ritmo constante de me
 
 ---
 
-## Estado actual (25-09-2026)
+## Estado actual (27-09-2026)
 
-Avance: MVP (fases 0–2) ≈ 88 % · proyecto completo ≈ 35 %.
+Avance: MVP (fases 0–2) ≈ 93 % · proyecto completo ≈ 37 %.
+
+Hecho el 27-09 (revisión de la Fase 2 en el navegador, modo `--offline`):
+- [x] Revisadas a mano todas las pantallas; flujo completo idea → guion → aprobar → producir → cola → biblioteca.
+- [x] Arreglado: "Generar ideas" quedaba deshabilitado (el `<select>` mostraba un canal que el modelo no tenía).
+- [x] Arreglado: "Guardar cambios" del guion nunca se habilitaba al editar.
+- [x] Arreglado: el proveedor `fake` no sabía generar ideas (502 en modo offline).
+- [x] Endpoint `POST /api/queue/retry-failed` y `QueueState.retryableCount` (solo cuenta fallos no superados).
+- [x] CSS de `producir-page` y `hoy-page` dentro del presupuesto (se extrajeron componentes).
+- [x] `nx run api:serve` recompila en caliente (el executor `@nx/js:node` chocaba con el chequeo de tareas recursivas de Nx 23).
 
 Pendientes para retomar:
-- [ ] Revisar a mano en el navegador **Biblioteca, Ideas y guiones y Hoy** (compilan, no se revisaron visualmente; el agente se detuvo al terminar).
+- [ ] **Brand kit** del canal (ver [03](03-modelo-de-datos.md)): no existe en la base ni en la UI. Mínimo para cerrar la Fase 2: fuente y colores de subtítulos aplicados al `subs.ass`, editables en Canal → Identidad. Watermark, intro/outro y música quedan para la Fase 4.
 - [ ] Primer video real con claves de Gemini y Pexels (`npx nx run api:cli keys set GEMINI_API_KEY`).
 - [ ] Probar en la PC con la RTX 3050: NVENC, whisper.cpp CUDA y el modelo `large-v3-turbo` (`tools/fetch-binaries.ts` elige solo).
+- [ ] En la laptop (Intel Iris Xe) el render sale con `libx264`, no con QSV: revisar la detección del codificador.
 - [ ] Pantalla Ajustes en pen.dev: los campos de clave todavía dicen ".env" (debe decir "cifrada").
-- [ ] Recortar CSS de `producir-page` y `hoy-page` (superan el presupuesto de 4 kB por componente; solo advertencia).
-- [ ] Endpoint de reintento masivo en la cola (hoy la UI reintenta de a uno).
 - [ ] Luego: Fase 3 (Google Drive).
 
 
@@ -54,15 +62,15 @@ Objetivo: **un comando que produce un short completo** para un canal.
 - ✅ **Entregable**: `nx run api:produce --channel <slug> --count 3` → 3 videos en `HEFESTO_HOME` (probado en modo `--offline`)
 
 ## Fase 2 · App base
-- [ ] `apps/web` Angular con el design system implementado
-- [ ] CRUD de canales con brand kit, perfil de voz ("probar voz") y estilo visual
-- [ ] Ideas y guiones con kanban de aprobación
-- [ ] Cola persistente (lanes GPU, red y CPU), pausar, saltar, detener, reintentar
-- [ ] Barra de producción en vivo (WebSocket), consola de logs
-- [ ] Biblioteca con reproductor
-- [ ] Pantalla Producir con resumen (tareas, ETA, costo estimado)
-- [ ] Telemetría de GPU, VRAM, CPU y disco
-- ✅ **Entregable**: producir desde la UI sin tocar la consola
+- [x] `apps/web` Angular con el design system implementado
+- [ ] CRUD de canales con brand kit, perfil de voz ("probar voz") y estilo visual (falta el brand kit)
+- [x] Ideas y guiones con kanban de aprobación
+- [x] Cola persistente (lanes GPU, red y CPU), pausar, saltar, detener, reintentar (uno o todos)
+- [x] Barra de producción en vivo (WebSocket), consola de logs
+- [x] Biblioteca con reproductor
+- [x] Pantalla Producir con resumen (tareas, ETA, costo estimado)
+- [x] Telemetría de GPU, VRAM, CPU y disco
+- ✅ **Entregable**: producir desde la UI sin tocar la consola (probado en modo `--offline`)
 
 ## Fase 3 · Google Drive
 - [ ] OAuth de escritorio (`drive.file`), estructura de carpetas por canal
