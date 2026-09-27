@@ -82,7 +82,8 @@ export class ColaPage {
     }));
   });
 
-  readonly failedCount = computed(() => this.tableRows().filter((r) => r.isFailed).length);
+  /** Productions stuck on a failed job; older failures already redone don't count. */
+  readonly retryableCount = computed(() => this.queue()?.retryableCount ?? 0);
   readonly runningCount = computed(() => this.tableRows().filter((r) => r.isRunning).length);
 
   readonly tableRows = computed<JobRow[]>(() => {
@@ -100,7 +101,8 @@ export class ColaPage {
     return [...running, ...queued, ...recent].map((job) => this.toRow(job));
   });
 
-  readonly totalTasks = computed(() => this.tableRows().length);
+  /** Running + queued. Recent (done/failed) rows stay in the table but don't count as pending work. */
+  readonly activeCount = computed(() => this.tableRows().filter((r) => r.isRunning || r.isQueued).length);
   readonly etaText = computed(() => {
     const q = this.queue();
     return q ? formatDurationMs(q.etaMs) : '';
@@ -241,31 +243,18 @@ export class ColaPage {
   }
 
   retryAllFailed(): void {
-    const failed = this.tableRows().filter((r) => r.isFailed).map((r) => r.job);
-    if (failed.length === 0) {
-      return;
-    }
     this.retryingAll.set(true);
-    let remaining = failed.length;
-    let errors = 0;
-    for (const job of failed) {
-      this.api.retryJob(job.id).subscribe({
-        next: () => {
-          remaining -= 1;
-          if (remaining === 0) {
-            this.retryingAll.set(false);
-            this.toasts.ok(errors === 0 ? 'Tareas reencoladas.' : `${failed.length - errors} de ${failed.length} reencoladas.`);
-          }
-        },
-        error: () => {
-          remaining -= 1;
-          errors += 1;
-          if (remaining === 0) {
-            this.retryingAll.set(false);
-            this.toasts.error('Algunas tareas no se pudieron reintentar.');
-          }
-        },
-      });
-    }
+    this.api.retryFailedJobs().subscribe({
+      next: ({ retried }) => {
+        this.retryingAll.set(false);
+        const n = retried.length;
+        this.toasts.ok(n === 0 ? 'No había tareas para reintentar.' : `${n} tarea${n === 1 ? '' : 's'} reencolada${n === 1 ? '' : 's'}.`);
+        this.load();
+      },
+      error: () => {
+        this.retryingAll.set(false);
+        this.toasts.error('No se pudieron reintentar las tareas.');
+      },
+    });
   }
 }

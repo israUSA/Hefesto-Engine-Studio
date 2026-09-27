@@ -364,6 +364,29 @@ describe('QueueService', () => {
     expect((await h.svc.waitFor(p.id)).status).toBe('done');
   });
 
+  it('retryFailed re-queues the latest failed job of each production and skips superseded ones', async () => {
+    h = setup();
+    h.runner.handlers.voice = async (_ref, _o, call) => {
+      if (call === 1) throw new Error('voz inválida');
+    };
+    const [a, b] = await h.svc.enqueue({ channelIds: [h.channelId], count: 2 });
+    expect((await h.svc.waitFor(a.id)).status).toBe('failed');
+    expect((await h.svc.waitFor(b.id)).status).toBe('failed');
+
+    // A is redone from the script: its old failed voice job is superseded, not retried again.
+    await h.svc.retryProduction(a.id, 'script');
+    expect((await h.svc.waitFor(a.id)).status).toBe('done');
+
+    expect(h.svc.state().retryableCount).toBe(1);
+    const result = await h.svc.retryFailed();
+    expect(result.retried.map((j) => j.productionId)).toEqual([b.id]);
+    expect(result.retried[0].status).toBe('queued');
+    expect((await h.svc.waitFor(b.id)).status).toBe('done');
+
+    expect(h.svc.state().retryableCount).toBe(0);
+    expect(await h.svc.retryFailed()).toEqual({ retried: [] });
+  });
+
   it('skip stops the job and the chain: the production is canceled', async () => {
     h = setup();
     h.runner.handlers.voice = (_ref, opts) => untilAborted(opts.signal);

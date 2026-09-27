@@ -5,6 +5,7 @@ import type {
   ProduceRequest,
   ProductionSummary,
   QueueState,
+  RetryFailedResult,
   StageKey,
 } from '@hefesto/shared-types';
 
@@ -26,6 +27,8 @@ export interface QueueApi {
   /** Kills the running subprocess / request; the job can be retried later. */
   cancel(jobId: string): Promise<JobDto>;
   retry(jobId: string): Promise<JobDto>;
+  /** Retries the latest failed job of every production in one call. */
+  retryFailed(): Promise<RetryFailedResult>;
   setPriority(jobId: string, priority: number): JobDto;
   setLaneConcurrency(lane: Lane, concurrency: number): QueueState;
   /** Re-queues a production from a stage (default: the first failed/pending one). */

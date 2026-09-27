@@ -202,6 +202,7 @@ export interface Page<T> {
 // GET    /api/queue                     → QueueState
 // POST   /api/queue/pause | /api/queue/resume → QueueState
 // POST   /api/queue/jobs/:id/skip | /cancel | /retry → JobDto
+// POST   /api/queue/retry-failed        → RetryFailedResult
 // PATCH  /api/queue/jobs/:id            { priority } → JobDto
 // PATCH  /api/queue/lanes/:lane         { concurrency } → QueueState
 
@@ -235,6 +236,13 @@ export interface QueueState {
   queued: JobDto[];
   recent: JobDto[];
   etaMs: number;
+  /** Productions whose latest job failed: what POST /api/queue/retry-failed would re-queue. */
+  retryableCount: number;
+}
+
+export interface RetryFailedResult {
+  /** Jobs put back in the queue: the latest failed job of each production. */
+  retried: JobDto[];
 }
 
 // ── Providers & keys ────────────────────────────────────────────────────

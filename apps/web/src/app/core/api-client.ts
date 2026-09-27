@@ -21,6 +21,7 @@ import type {
   ProviderConfig,
   ProviderDto,
   QueueState,
+  RetryFailedResult,
   ScriptDto,
   ScriptPatch,
   SecretDto,
@@ -152,6 +153,10 @@ export class ApiClient {
 
   retryJob(id: string): Observable<JobDto> {
     return this.http.post<JobDto>(`${this.base}/queue/jobs/${id}/retry`, {});
+  }
+
+  retryFailedJobs(): Observable<RetryFailedResult> {
+    return this.http.post<RetryFailedResult>(`${this.base}/queue/retry-failed`, {});
   }
 
   setJobPriority(id: string, priority: number): Observable<JobDto> {

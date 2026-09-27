@@ -9,7 +9,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import type { JobDto, Lane, QueueState } from '@hefesto/shared-types';
+import type { JobDto, Lane, QueueState, RetryFailedResult } from '@hefesto/shared-types';
 import { QUEUE_API, type QueueApi } from '../queue/queue.contract';
 import { laneConcurrencyPatchSchema, priorityPatchSchema } from './common/schemas';
 import { ZodValidationPipe } from './common/zod-validation.pipe';
@@ -51,6 +51,11 @@ export class QueueController {
   @Post('jobs/:id/retry')
   retry(@Param('id') id: string): Promise<JobDto> {
     return this.requireQueue().retry(id);
+  }
+
+  @Post('retry-failed')
+  retryFailed(): Promise<RetryFailedResult> {
+    return this.requireQueue().retryFailed();
   }
 
   @Patch('jobs/:id')

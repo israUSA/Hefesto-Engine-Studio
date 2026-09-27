@@ -18,6 +18,7 @@ import {
   type ProduceRequest,
   type ProductionSummary,
   type QueueState,
+  type RetryFailedResult,
   type StageKey,
 } from '@hefesto/shared-types';
 import { randomUUID } from 'node:crypto';
@@ -235,6 +236,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
       queued: queued.map(toDto),
       recent: recent.map(toDto),
       etaMs: simulateEta(this.activeChains(running, queued), this.concurrency),
+      retryableCount: this.store.openFailures().length,
     };
   }
 
@@ -371,6 +373,19 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
     this.productionChanged(pid);
     this.kick();
     return this.toDto(row);
+  }
+
+  /**
+   * Retries every production whose latest job failed. Older failed jobs of a production
+   * that later moved on (or already has a job in the queue) are left alone.
+   */
+  async retryFailed(): Promise<RetryFailedResult> {
+    this.ensureStarted();
+    const retried: JobDto[] = [];
+    for (const job of this.store.openFailures()) {
+      retried.push(await this.retry(job.id));
+    }
+    return { retried };
   }
 
   setPriority(jobId: string, priority: number): JobDto {
