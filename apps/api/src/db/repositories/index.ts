@@ -7,3 +7,4 @@ export * from './provider-bindings.repository';
 export * from './ideas.repository';
 export * from './scripts.repository';
 export * from './settings.repository';
+export * from './remote-files.repository';

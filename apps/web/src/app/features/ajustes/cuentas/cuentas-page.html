@@ -1,0 +1,94 @@
+<div class="hf-cuentas">
+  <header>
+    <h2 class="hf-cuentas__title">Cuentas y OAuth</h2>
+    <p class="hf-cuentas__lead">Las cuentas que el motor usa en tu nombre. Los tokens se guardan cifrados en esta PC y nunca se muestran.</p>
+  </header>
+
+  @if (status(); as s) {
+    <section class="hf-acct">
+      <div class="hf-acct__head">
+        <hf-icon name="drive" [size]="18" />
+        <div>
+          <h3>Google Drive</h3>
+          <p>Archivo de los videos terminados · permiso <code>drive.file</code> (solo los archivos que crea Hefesto)</p>
+        </div>
+        <hf-status-chip [tone]="s.connected ? 'ok' : 'neutral'">{{ s.connected ? 'Conectado' : 'Sin conectar' }}</hf-status-chip>
+      </div>
+
+      <ol class="hf-steps">
+        <li [class.hf-steps--done]="s.clientConfigured">
+          <strong>Cliente OAuth de Google</strong>
+          @if (s.clientConfigured && !editingClient()) {
+            <p>
+              <hf-icon name="check" [size]="12" /> Cargado (cifrado).
+              <button type="button" class="hf-linkbtn" (click)="editingClient.set(true)">Cambiar</button>
+            </p>
+          } @else {
+            <p>
+              En <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Cloud</a>
+              habilitá la Drive API y creá credenciales <em>OAuth → App de escritorio</em>. Pegá el ID y el secreto:
+            </p>
+            <div class="hf-steps__form">
+              <hf-input icon="key" placeholder="ID de cliente (….apps.googleusercontent.com)" ariaLabel="ID de cliente" [(ngModel)]="clientId" />
+              <hf-input type="password" icon="key" placeholder="Secreto del cliente" ariaLabel="Secreto del cliente" [(ngModel)]="clientSecret" />
+              <div class="hf-steps__row">
+                @if (s.clientConfigured) {
+                  <hf-button variant="ghost" (pressed)="editingClient.set(false)">Cancelar</hf-button>
+                }
+                <hf-button
+                  variant="secondary"
+                  [loading]="savingClient()"
+                  [disabled]="!clientId.trim() || !clientSecret.trim()"
+                  (pressed)="saveClient()"
+                >
+                  Guardar cliente
+                </hf-button>
+              </div>
+            </div>
+          }
+        </li>
+
+        <li [class.hf-steps--done]="s.connected">
+          <strong>Conectar la cuenta</strong>
+          @if (s.connected) {
+            <p><hf-icon name="check" [size]="12" /> {{ s.email ? 'Conectado como ' + s.email : 'Conectado' }}.</p>
+            <div class="hf-steps__row">
+              <a class="hf-steps__go" routerLink="/drive">Ver el archivo <hf-icon name="arrow-right" [size]="12" /></a>
+              <hf-button variant="secondary" [loading]="connecting()" (pressed)="connect()">Reconectar</hf-button>
+              <hf-button variant="danger" [loading]="disconnecting()" (pressed)="disconnect()">Desconectar</hf-button>
+            </div>
+          } @else {
+            <p>Se abre Google en el navegador; al aceptar, volvé a esta pantalla.</p>
+            <div class="hf-steps__row">
+              <hf-button variant="primary" [disabled]="!s.clientConfigured" [loading]="connecting()" (pressed)="connect()">
+                <hf-icon name="external-link" [size]="13" /> Conectar con Google
+              </hf-button>
+              @if (connecting()) {
+                <span class="hf-muted">Esperando la respuesta de Google…</span>
+                <button type="button" class="hf-linkbtn" (click)="cancelConnect()">Cancelar</button>
+              }
+            </div>
+          }
+        </li>
+      </ol>
+
+      <p class="hf-fine">
+        Dirección de retorno: <code>{{ s.redirectUri }}</code>
+        <button type="button" class="hf-linkbtn" (click)="copy(s.redirectUri)">Copiar</button> · Con la pantalla de consentimiento en
+        modo "prueba", Google vence el acceso cada 7 días: publicala (sin verificar, uso propio) para no reconectar.
+      </p>
+    </section>
+
+    <section class="hf-acct hf-acct--muted">
+      <div class="hf-acct__head">
+        <hf-icon name="youtube" [size]="18" />
+        <div>
+          <h3>YouTube y TikTok</h3>
+          <p>La subida directa llega con la publicación (fase 5).</p>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <hf-skeleton height="260px" />
+  }
+</div>

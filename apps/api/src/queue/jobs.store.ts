@@ -88,6 +88,22 @@ export class JobsStore {
       .all() as unknown as JobRow[];
   }
 
+  /** Failed jobs that are still the latest job of their production (not superseded by a redo). */
+  openFailures(): JobRow[] {
+    return this.db
+      .select()
+      .from(jobs)
+      .where(
+        and(
+          eq(jobs.status, 'failed'),
+          sql`${jobs}.rowid = (select max(j2.rowid) from jobs j2
+            where json_extract(j2.payload, '$.productionId') = json_extract(${jobs.payload}, '$.productionId'))`,
+        ),
+      )
+      .orderBy(sql`${jobs}.rowid`)
+      .all() as unknown as JobRow[];
+  }
+
   activeForProduction(productionId: string): JobRow[] {
     return this.db
       .select()

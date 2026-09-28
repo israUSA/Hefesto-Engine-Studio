@@ -6,6 +6,7 @@
 import { sql } from 'drizzle-orm';
 import { integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import type {
+  BrandKit,
   Capability,
   HealthResult,
   Platform,
@@ -39,7 +40,11 @@ export const channels = sqliteTable('channels', {
     .notNull(),
   voiceProfile: text('voice_profile', { mode: 'json' }).$type<VoiceProfile>().notNull(),
   visualStyle: text('visual_style', { mode: 'json' }).$type<VisualStyle>().notNull(),
+  /** Null on channels created before the brand kit existed: read as DEFAULT_BRAND_KIT. */
+  brandKit: text('brand_kit', { mode: 'json' }).$type<BrandKit>(),
   driveFolderId: text('drive_folder_id'),
+  /** Upload finished videos to the storage provider after a passing QA. */
+  autoArchive: integer('auto_archive', { mode: 'boolean' }).notNull().default(true),
   /** Marks content as AI-generated when publishing. */
   aiLabel: integer('ai_label', { mode: 'boolean' }).notNull().default(true),
   /** Blocks non-commercial-license providers for this channel (ADR-008). */
@@ -129,9 +134,39 @@ export const productions = sqliteTable('productions', {
   error: text('error'),
   durationMs: integer('duration_ms'),
   costUsd: real('cost_usd').notNull().default(0),
+  /** Set when "Liberar espacio" deleted the heavy files (they stay in the remote). */
+  freedAt: text('freed_at'),
   createdAt: text('created_at').notNull().default(nowIso()),
   updatedAt: text('updated_at').notNull().default(nowIso()),
 });
+
+// ── Remote files (docs/03 · DriveFile, any StorageProvider) ────────────
+
+export const remoteFiles = sqliteTable(
+  'remote_files',
+  {
+    id: text('id').primaryKey(),
+    productionId: text('production_id')
+      .notNull()
+      .references(() => productions.id),
+    channelId: text('channel_id')
+      .notNull()
+      .references(() => channels.id),
+    /** ArchivedKind: render | thumb | voice | script. */
+    kind: text('kind').$type<'render' | 'thumb' | 'voice' | 'script'>().notNull(),
+    /** File name inside the production folder (render.mp4, voice.wav…). */
+    localName: text('local_name').notNull(),
+    providerConfigId: text('provider_config_id').notNull(),
+    remoteId: text('remote_id').notNull(),
+    remotePath: text('remote_path').notNull(),
+    md5: text('md5').notNull(),
+    sizeBytes: integer('size_bytes').notNull(),
+    /** false when the last sync didn't find it in the remote. */
+    present: integer('present', { mode: 'boolean' }).notNull().default(true),
+    syncedAt: text('synced_at').notNull().default(nowIso()),
+  },
+  (table) => [uniqueIndex('remote_files_production_kind_idx').on(table.productionId, table.kind)],
+);
 
 // ── Assets ──────────────────────────────────────────────────────────────
 

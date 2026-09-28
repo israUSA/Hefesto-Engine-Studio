@@ -54,6 +54,7 @@ export class LocalMediaTools implements MediaTools {
           fontSizePx: style.fontSize,
           primaryColor: style.primaryColor,
           highlightColor: style.highlightColor,
+          outlineColor: style.outlineColor,
           uppercase: style.uppercase,
         },
       },

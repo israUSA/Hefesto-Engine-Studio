@@ -41,22 +41,22 @@
     },
     "serve": {
       "continuous": true,
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
       "dependsOn": [
         "build"
       ],
       "options": {
-        "buildTarget": "api:build",
-        "runBuildTargetDependencies": false
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "api:build:development"
+        "parallel": true,
+        "env": {
+          "NODE_ENV": "development"
         },
-        "production": {
-          "buildTarget": "api:build:production"
-        }
+        "commands": [
+          "cd apps/api && npx webpack-cli build --watch",
+          "node --watch dist/apps/api/main.js"
+        ]
+      },
+      "metadata": {
+        "description": "Webpack in watch mode plus node --watch. The @nx/js:node executor trips Nx's recursive-task check on every rebuild."
       }
     },
     "test": {
@@ -74,7 +74,7 @@
         "forwardAllArgs": true
       },
       "metadata": {
-        "description": "Produce N shorts: nx run api:produce --channel fe-diaria --count 3"
+        "description": "Produce N shorts: nx run api:produce --channel <slug> --count 3"
       }
     },
     "cli": {

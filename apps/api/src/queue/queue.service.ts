@@ -18,6 +18,7 @@ import {
   type ProduceRequest,
   type ProductionSummary,
   type QueueState,
+  type RetryFailedResult,
   type StageKey,
 } from '@hefesto/shared-types';
 import { randomUUID } from 'node:crypto';
@@ -54,6 +55,7 @@ export const STAGE_LABELS: Record<StageKey, string> = {
   visuals: 'Visuales',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 const SETTING_PAUSED = 'queue.paused';
@@ -235,6 +237,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
       queued: queued.map(toDto),
       recent: recent.map(toDto),
       etaMs: simulateEta(this.activeChains(running, queued), this.concurrency),
+      retryableCount: this.store.openFailures().length,
     };
   }
 
@@ -373,6 +376,19 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
     return this.toDto(row);
   }
 
+  /**
+   * Retries every production whose latest job failed. Older failed jobs of a production
+   * that later moved on (or already has a job in the queue) are left alone.
+   */
+  async retryFailed(): Promise<RetryFailedResult> {
+    this.ensureStarted();
+    const retried: JobDto[] = [];
+    for (const job of this.store.openFailures()) {
+      retried.push(await this.retry(job.id));
+    }
+    return { retried };
+  }
+
   setPriority(jobId: string, priority: number): JobDto {
     this.ensureStarted();
     if (!Number.isFinite(priority)) throw new BadRequestException('La prioridad debe ser un número');
@@ -400,7 +416,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
     return this.stateChanged();
   }
 
-  async retryProduction(productionId: string, fromStage?: StageKey): Promise<ProductionSummary> {
+  async retryProduction(productionId: string, fromStage?: StageKey, opts: { force?: boolean } = {}): Promise<ProductionSummary> {
     this.ensureStarted();
     if (fromStage && !STAGE_ORDER.includes(fromStage)) throw new BadRequestException(`Etapa desconocida: ${fromStage}`);
     if (this.store.activeForProduction(productionId).length) {
@@ -427,6 +443,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
       topic: last?.payload.topic,
       scriptId: last?.payload.scriptId,
       seq: last?.payload.seq ?? this.nextSeq(),
+      ...(opts.force && { force: true }),
     };
     await this.runner.setStatus(productionId, 'pending');
     await this.enqueueStage(from, payload, last?.priority ?? 0);
@@ -597,6 +614,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
         { productionId: pid, channelId: job.payload.channelId, topic: job.payload.topic, scriptId: job.payload.scriptId },
         job.type,
         {
+          force: job.payload.force,
           signal: active.controller.signal,
           onProgress: (v) => this.onProgress(active, v),
           onEvent: (e) => this.onPipelineEvent(active, e),

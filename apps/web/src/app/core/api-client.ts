@@ -7,6 +7,10 @@ import type {
   ChannelInput,
   ChannelSummary,
   ChannelTemplateDto,
+  FontDto,
+  FreeSpaceResult,
+  GoogleAccountStatus,
+  GoogleClientRequest,
   GenerateIdeasRequest,
   GenerateScriptRequest,
   IdeaDto,
@@ -21,11 +25,15 @@ import type {
   ProviderConfig,
   ProviderDto,
   QueueState,
+  RetryFailedResult,
   ScriptDto,
   ScriptPatch,
   SecretDto,
+  StorageOverview,
+  StorageTargetRequest,
   SystemInfo,
   Telemetry,
+  UploadResult,
   VoicePreviewRequest,
   VoicePreviewResponse,
 } from '@hefesto/shared-types';
@@ -56,6 +64,10 @@ export class ApiClient {
 
   createChannel(input: ChannelInput): Observable<Channel> {
     return this.http.post<Channel>(`${this.base}/channels`, input);
+  }
+
+  listFonts(): Observable<FontDto[]> {
+    return this.http.get<FontDto[]>(`${this.base}/fonts`);
   }
 
   updateChannel(id: string, patch: Partial<ChannelInput>): Observable<Channel> {
@@ -154,6 +166,10 @@ export class ApiClient {
     return this.http.post<JobDto>(`${this.base}/queue/jobs/${id}/retry`, {});
   }
 
+  retryFailedJobs(): Observable<RetryFailedResult> {
+    return this.http.post<RetryFailedResult>(`${this.base}/queue/retry-failed`, {});
+  }
+
   setJobPriority(id: string, priority: number): Observable<JobDto> {
     return this.http.patch<JobDto>(`${this.base}/queue/jobs/${id}`, { priority });
   }
@@ -199,6 +215,47 @@ export class ApiClient {
 
   deleteSecret(name: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/secrets/${name}`);
+  }
+
+  // ── Storage (Drive) ─────────────────────────────────────────────────
+  getStorage(): Observable<StorageOverview> {
+    return this.http.get<StorageOverview>(`${this.base}/storage`);
+  }
+
+  setStorageTarget(target: StorageTargetRequest): Observable<StorageOverview> {
+    return this.http.put<StorageOverview>(`${this.base}/storage/target`, target);
+  }
+
+  syncStorage(): Observable<StorageOverview> {
+    return this.http.post<StorageOverview>(`${this.base}/storage/sync`, {});
+  }
+
+  uploadToStorage(productionIds?: string[]): Observable<UploadResult> {
+    return this.http.post<UploadResult>(`${this.base}/storage/upload`, { productionIds });
+  }
+
+  freeSpace(productionIds?: string[]): Observable<FreeSpaceResult> {
+    return this.http.post<FreeSpaceResult>(`${this.base}/storage/free`, { productionIds });
+  }
+
+  restoreProduction(id: string): Observable<ProductionSummary> {
+    return this.http.post<ProductionSummary>(`${this.base}/storage/productions/${id}/restore`, {});
+  }
+
+  getGoogleAccount(): Observable<GoogleAccountStatus> {
+    return this.http.get<GoogleAccountStatus>(`${this.base}/storage/google`);
+  }
+
+  setGoogleClient(client: GoogleClientRequest): Observable<GoogleAccountStatus> {
+    return this.http.put<GoogleAccountStatus>(`${this.base}/storage/google/client`, client);
+  }
+
+  connectGoogle(): Observable<{ authUrl: string }> {
+    return this.http.post<{ authUrl: string }>(`${this.base}/storage/google/connect`, {});
+  }
+
+  disconnectGoogle(): Observable<GoogleAccountStatus> {
+    return this.http.delete<GoogleAccountStatus>(`${this.base}/storage/google`);
   }
 
   // ── System ──────────────────────────────────────────────────────────

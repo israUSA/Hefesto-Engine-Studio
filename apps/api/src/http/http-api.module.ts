@@ -11,6 +11,7 @@ import { ChannelTemplatesController } from './channel-templates.controller';
 import { ChannelsController } from './channels.controller';
 import { ApiExceptionFilter } from './common/api-exception.filter';
 import { FilesController } from './files.controller';
+import { FontsController } from './fonts.controller';
 import { IdeasController } from './ideas.controller';
 import { LogsController } from './logs.controller';
 import { ProductionsController } from './productions.controller';
@@ -35,6 +36,7 @@ import { SecretsController } from './secrets.controller';
     SecretsController,
     LogsController,
     FilesController,
+    FontsController,
   ],
   providers: [{ provide: APP_FILTER, useClass: ApiExceptionFilter }],
 })

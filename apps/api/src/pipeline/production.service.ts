@@ -1,6 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   STAGE_ORDER,
+  type ArchivedKind,
+  type BrandKit,
   type Channel,
   type ProductionStage,
   type RunStatus,
@@ -10,11 +12,11 @@ import {
   type WordTiming,
 } from '@hefesto/shared-types';
 import { randomUUID } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { extname, join } from 'node:path';
 import { paths } from '../config/env';
-import { generateStructured, scriptDraftJsonSchema, scriptDraftSchema } from '../providers';
+import { generateStructured, md5File, scriptDraftJsonSchema, scriptDraftSchema } from '../providers';
 import { inputHash } from './hash';
 import {
   BIBLE_LOOKUP,
@@ -26,6 +28,7 @@ import {
   type ProductionStore,
   PROVIDER_GATEWAY,
   type ProviderGateway,
+  type RemoteFileRecord,
   type SceneClip,
   type StoredScript,
   type SubtitleStyle,
@@ -98,13 +101,47 @@ interface QaCheck {
   threshold: string;
 }
 
-const DEFAULT_SUBTITLE_STYLE: SubtitleStyle = {
-  fontName: 'Archivo Black',
-  fontSize: 84,
-  primaryColor: '#FFFFFF',
-  highlightColor: '#FFD23F',
-  uppercase: true,
-};
+/** The channel's brand kit as the subtitles stage sees it (also part of its input hash). */
+export function subtitleStyleFor(kit: BrandKit): SubtitleStyle {
+  return {
+    fontName: kit.subtitleFont,
+    fontSize: kit.subtitleSize,
+    primaryColor: kit.textColor,
+    highlightColor: kit.highlightColor,
+    outlineColor: kit.outlineColor,
+    uppercase: kit.uppercase,
+  };
+}
+
+/** What the `archive` stage uploads, and the remote folder of each kind (docs/06). */
+export const ARCHIVE_FILES: { kind: ArchivedKind; name: string; folder: string }[] = [
+  { kind: 'render', name: 'render.mp4', folder: 'renders' },
+  { kind: 'thumb', name: 'thumb.jpg', folder: 'thumbs' },
+  { kind: 'voice', name: 'voice.wav', folder: 'audio' },
+  { kind: 'script', name: 'script.json', folder: 'scripts' },
+];
+
+/** Heavy files "Liberar espacio" deletes once archived; they come back on demand. */
+export const FREEABLE_FILES = ['render.mp4', 'voice.wav', 'voice.raw.wav'];
+
+/** "Nombre (TikTok)": the channel's folder in the storage provider. */
+export function channelFolderName(channel: Pick<Channel, 'name' | 'platform'>): string {
+  const name = channel.name.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim() || 'Canal';
+  return `${name} (${channel.platform === 'tiktok' ? 'TikTok' : 'YouTube'})`;
+}
+
+function slugify(text: string): string {
+  return (
+    text
+      .normalize('NFD')
+      .replace(/\p{M}/gu, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48)
+      .replace(/-+$/, '') || 'video'
+  );
+}
 
 const MAX_WER = 0.08;
 const TARGET_LUFS = -14;
@@ -252,6 +289,7 @@ interface StageDeps {
 class StageRun {
   private costUsd = 0;
   private scriptCache?: StoredScript;
+  private remoteCache?: RemoteFileRecord[];
   private stageIdx = 0;
   private lastProgressWrite = 0;
 
@@ -289,6 +327,29 @@ class StageRun {
   private async script(): Promise<StoredScript> {
     this.scriptCache ??= JSON.parse(await readFile(this.file('script.json'), 'utf8')) as StoredScript;
     return this.scriptCache;
+  }
+
+  private async remote(): Promise<RemoteFileRecord[]> {
+    this.remoteCache ??= await this.d.store.remoteFiles(this.id);
+    return this.remoteCache;
+  }
+
+  /**
+   * Path of a production file; if "Liberar espacio" deleted it, it's brought back from the
+   * storage provider first (docs/06: done = on disk or archived, never regenerated).
+   */
+  private async local(name: string): Promise<string> {
+    const path = this.file(name);
+    if (existsSync(path)) return path;
+    const archived = (await this.remote()).find((r) => r.localName === name && r.present);
+    if (!archived) return path;
+    const { usage } = await this.d.providers.callConfig('storage', archived.providerConfigId, this.scope(), (p) =>
+      p.get(archived.remoteId, path, this.ctx()),
+    );
+    await this.cost(archived.providerConfigId, 'storage-get', usage);
+    this.emit({ type: 'info', productionId: this.id, message: `Traído de vuelta del archivo: ${name}` });
+    if (['render.mp4', 'voice.wav'].every((f) => existsSync(this.file(f)))) await this.d.store.setFreed(this.id, false);
+    return path;
   }
 
   private async cost(providerConfigId: string, operation: string, usage: Usage): Promise<void> {
@@ -350,6 +411,9 @@ class StageRun {
         skipped = false;
         qaPassed = await this.qaStage();
         break;
+      case 'archive':
+        skipped = await this.archiveStage();
+        break;
       default:
         throw new Error(`Etapa desconocida: ${String(stage)}`);
     }
@@ -365,8 +429,9 @@ class StageRun {
   }
 
   /**
-   * Idempotent stage: its hash chains the previous stage's stored hash, so changing
-   * anything upstream re-runs this stage and every stage after it. Returns true if skipped.
+   * Idempotent stage: its hash chains the stored hashes of the stages it depends on
+   * (by default the previous one), so changing anything upstream re-runs this stage and
+   * every stage that depends on it. Returns true if skipped.
    */
   private async stage(
     key: StageKey,
@@ -374,14 +439,17 @@ class StageRun {
     inputs: unknown,
     outputs: string[],
     body: () => Promise<void>,
+    deps?: StageKey[],
   ): Promise<boolean> {
     this.opts.signal?.throwIfAborted();
-    const prev = this.stageIdx > 0 ? (this.production.inputHashes[STAGE_ORDER[this.stageIdx - 1]] ?? '') : '';
+    const after = deps ?? (this.stageIdx > 0 ? [STAGE_ORDER[this.stageIdx - 1]] : []);
+    const prev = after.map((k) => this.production.inputHashes[k] ?? '').join('|');
     const hash = inputHash({ prev, key, inputs });
+    const archived = new Set((await this.remote()).filter((r) => r.present).map((r) => r.localName));
     const upToDate =
       !this.opts.force &&
       this.production.inputHashes[key] === hash &&
-      outputs.every((o) => existsSync(this.file(o)));
+      outputs.every((o) => existsSync(this.file(o)) || archived.has(o));
 
     if (upToDate) {
       this.emit({ type: 'stage', productionId: this.id, stage: key, state: 'skipped' });
@@ -501,9 +569,10 @@ class StageRun {
 
     return this.stage('transcribe', 'transcribed', inputs, ['words.json', 'transcript.json'], async () => {
       const script = await this.script();
+      const audio = await this.local('voice.wav');
       const { result, providerConfigId } = await this.d.providers.call('transcribe', this.scope(), (p) =>
         p.transcribe(
-          { audioPath: this.file('voice.wav'), language: this.channel.language, prompt: script.fullText },
+          { audioPath: audio, language: this.channel.language, prompt: script.fullText },
           this.ctx(),
         ),
       );
@@ -524,7 +593,7 @@ class StageRun {
   // ── 4b · Subtítulos ─────────────────────────────────────────────────────
 
   private async subtitlesStage(): Promise<boolean> {
-    const style = DEFAULT_SUBTITLE_STYLE;
+    const style = subtitleStyleFor(this.channel.brandKit);
     return this.stage('subtitles', null, { style, format: this.channel.format }, ['subs.ass'], async () =>
       this.d.media.writeSubtitles(await this.words(), style, this.channel.format, this.file('subs.ass')),
     );
@@ -539,7 +608,7 @@ class StageRun {
   /** Scene clips on the voice timeline (deterministic from script, words and voice length). */
   private async clips(): Promise<SceneClip[]> {
     const script = await this.script();
-    const voiceMs = await this.d.media.probeDurationMs(this.file('voice.wav'));
+    const voiceMs = await this.d.media.probeDurationMs(await this.local('voice.wav'));
     const timeline = sceneTimeline(
       script.scenes.map((s) => s.text),
       await this.words(),
@@ -558,14 +627,23 @@ class StageRun {
       provider: await this.d.providers.describe('stock', this.scope()),
     };
 
-    return this.stage('visuals', 'visuals_ready', inputs, sceneFiles, async () => {
-      const used = new Set<string>();
-      for (const [i, scene] of script.scenes.entries()) {
-        this.opts.signal?.throwIfAborted();
-        await this.downloadSceneImage(scene.keywords, this.file(sceneFiles[i]), used, scene.visualPrompt);
-        this.progress('visuals', (i + 1) / script.scenes.length);
-      }
-    });
+    // Scene images come from the script alone: a new voice or brand kit must not re-download
+    // (or re-pay for) them.
+    return this.stage(
+      'visuals',
+      'visuals_ready',
+      inputs,
+      sceneFiles,
+      async () => {
+        const used = new Set<string>();
+        for (const [i, scene] of script.scenes.entries()) {
+          this.opts.signal?.throwIfAborted();
+          await this.downloadSceneImage(scene.keywords, this.file(sceneFiles[i]), used, scene.visualPrompt);
+          this.progress('visuals', (i + 1) / script.scenes.length);
+        }
+      },
+      ['script'],
+    );
   }
 
   /** Tries the scene keywords, then fewer keywords, then a generic query. Avoids repeating a photo. */
@@ -607,30 +685,40 @@ class StageRun {
     const clips = await this.clips();
     const inputs = { clips: clips.map((c) => [c.startMs, c.endMs]), format: this.channel.format };
 
-    return this.stage('render', 'rendered', inputs, ['render.mp4', 'thumb.jpg'], async () => {
-      const { encoder } = await this.d.media.render(
-        {
-          scenes: clips,
-          voicePath: this.file('voice.wav'),
-          subsPath: this.file('subs.ass'),
-          format: this.channel.format,
-          outPath: this.file('render.mp4'),
-        },
-        { signal: this.opts.signal, onProgress: (value) => this.progress('render', value) },
-      );
-      await this.d.media.thumbnail(this.file('render.mp4'), this.file('thumb.jpg'), 1200);
-      const durationMs = await this.d.media.probeDurationMs(this.file('render.mp4'));
-      await this.d.store.setRender(this.id, this.file('render.mp4'), durationMs);
-      this.emit({ type: 'info', productionId: this.id, message: `Render con ${encoder}` });
-      for (const [kind, name] of [['render', 'render.mp4'], ['thumb', 'thumb.jpg']] as const) {
-        await this.d.store.recordAsset({
-          productionId: this.id,
-          kind,
-          localPath: this.file(name),
-          inputHash: inputHash(inputs),
-        });
-      }
-    });
+    // Re-renders when the subtitles (voice, words, brand kit) or the scene images change.
+    return this.stage(
+      'render',
+      'rendered',
+      inputs,
+      ['render.mp4', 'thumb.jpg'],
+      async () => {
+        const { encoder } = await this.d.media.render(
+          {
+            scenes: clips,
+            voicePath: this.file('voice.wav'),
+            subsPath: this.file('subs.ass'),
+            format: this.channel.format,
+            outPath: this.file('render.mp4'),
+          },
+          { signal: this.opts.signal, onProgress: (value) => this.progress('render', value) },
+        );
+        await this.d.media.thumbnail(this.file('render.mp4'), this.file('thumb.jpg'), 1200);
+        const durationMs = await this.d.media.probeDurationMs(this.file('render.mp4'));
+        await this.d.store.setRender(this.id, this.file('render.mp4'), durationMs);
+        // A re-render of a freed production puts the heavy files back on disk.
+        await this.d.store.setFreed(this.id, false);
+        this.emit({ type: 'info', productionId: this.id, message: `Render con ${encoder}` });
+        for (const [kind, name] of [['render', 'render.mp4'], ['thumb', 'thumb.jpg']] as const) {
+          await this.d.store.recordAsset({
+            productionId: this.id,
+            kind,
+            localPath: this.file(name),
+            inputHash: inputHash(inputs),
+          });
+        }
+      },
+      ['subtitles', 'visuals'],
+    );
   }
 
   // ── 7 · QA (subset de Fase 1) ───────────────────────────────────────────
@@ -641,7 +729,7 @@ class StageRun {
     const script = await this.script();
     const checks: QaCheck[] = [];
 
-    const durationS = (await this.d.media.probeDurationMs(this.file('render.mp4'))) / 1000;
+    const durationS = (await this.d.media.probeDurationMs(await this.local('render.mp4'))) / 1000;
     const { min, max } = this.channel.durationTarget;
     checks.push({
       name: 'duración',
@@ -695,5 +783,100 @@ class StageRun {
       }`,
     });
     return passed;
+  }
+
+  // ── 8 · Archivo (Drive u otro StorageProvider) ─────────────────────────
+
+  private async qaPassed(): Promise<boolean> {
+    try {
+      return (JSON.parse(await readFile(this.file('qa.json'), 'utf8')) as { passed: boolean }).passed;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Uploads render, cover, voice and script. Automatic only after a passing QA and when the
+   * channel archives automatically; `force` (the "Subir" button) uploads anyway. Files whose
+   * checksum is already in the remote are not sent again.
+   */
+  private async archiveStage(): Promise<boolean> {
+    const configId = await this.d.providers.boundConfigId('storage', this.scope());
+    const skipReason = !configId
+      ? 'no hay almacenamiento configurado'
+      : this.opts.force
+        ? undefined
+        : !this.channel.autoArchive
+          ? 'el canal no archiva automáticamente'
+          : !(await this.qaPassed())
+            ? 'el QA tiene fallas'
+            : undefined;
+    if (skipReason) {
+      const hash = inputHash({ key: 'archive', skip: skipReason });
+      this.production.inputHashes['archive'] = hash;
+      await this.d.store.markStage(this.id, 'archive', hash);
+      this.emit({ type: 'info', productionId: this.id, message: `Archivo: no se sube (${skipReason})` });
+      this.emit({ type: 'stage', productionId: this.id, stage: 'archive', state: 'skipped' });
+      return true;
+    }
+
+    const files: { kind: ArchivedKind; name: string; folder: string; path: string; md5: string; size: number }[] = [];
+    for (const f of ARCHIVE_FILES) {
+      const path = await this.local(f.name);
+      if (!existsSync(path)) continue;
+      files.push({ ...f, path, md5: await md5File(path), size: statSync(path).size });
+    }
+    const remote = await this.remote();
+    const inputs = {
+      provider: await this.d.providers.describe('storage', this.scope()),
+      files: files.map((f) => [f.kind, f.md5]),
+      // A file "Sincronizar" found missing in the remote makes the stage upload again.
+      missing: remote.filter((r) => !r.present).map((r) => r.kind),
+    };
+
+    return this.stage('archive', null, inputs, [], async () => {
+      const script = await this.script();
+      const month = (this.production.createdAt ?? new Date().toISOString()).slice(0, 7);
+      const base = `${this.id.slice(0, 8)}-${slugify(script.title)}`;
+      const total = files.reduce((sum, f) => sum + f.size, 0) || 1;
+      let done = 0;
+      let uploaded = 0;
+
+      for (const f of files) {
+        const prev = remote.find((r) => r.kind === f.kind && r.providerConfigId === configId);
+        if (prev?.present && prev.md5 === f.md5) {
+          done += f.size;
+          continue;
+        }
+        const remotePath =
+          prev?.remotePath ?? `${channelFolderName(this.channel)}/${f.folder}/${month}/${base}${extname(f.name)}`;
+        const { result, providerConfigId } = await this.d.providers.call('storage', this.scope(), (p) =>
+          p.put(f.path, remotePath, this.ctx(), {
+            onProgress: (sent) => this.progress('archive', Math.min(1, (done + sent) / total)),
+          }),
+        );
+        if (result.file.md5 && result.file.md5 !== f.md5) {
+          throw new Error(`El checksum de ${f.name} en el archivo no coincide con el local`);
+        }
+        await this.cost(providerConfigId, 'storage', result.usage);
+        await this.d.store.recordRemoteFile(this.id, this.channel.id, {
+          kind: f.kind,
+          localName: f.name,
+          providerConfigId,
+          remoteId: result.file.remoteId,
+          remotePath: result.file.remotePath,
+          md5: result.file.md5 ?? f.md5,
+          sizeBytes: result.file.sizeBytes,
+        });
+        done += f.size;
+        uploaded++;
+      }
+      this.progress('archive', 1);
+      this.emit({
+        type: 'info',
+        productionId: this.id,
+        message: uploaded ? `Archivado: ${uploaded} archivo(s) verificados` : 'Archivo: ya estaba todo subido',
+      });
+    });
   }
 }

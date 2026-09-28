@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ChannelSummary, ProductionSummary } from '@hefesto/shared-types';
 import { Button, EmptyState, Icon, Select, SelectOption, Skeleton, StatusChip, Thumb9x16 } from '@hefesto/web-ui';
 import { ApiClient } from '../../core/api-client';
+import { productionStatus } from '../../core/production-status';
 import { LiveEvents } from '../../core/live-events';
 import { ProductionInspector } from './production-inspector';
 
@@ -18,15 +19,6 @@ const QA_FILTER_OPTIONS: SelectOption[] = [
 ];
 
 const PAGE_SIZE = 24;
-
-function statusOf(p: ProductionSummary): { label: string; tone: 'ok' | 'warn' | 'danger' | 'steel' | 'accent' | 'neutral' } {
-  if (p.status === 'failed') return { label: 'Falló', tone: 'danger' };
-  if (p.status === 'running') return { label: 'Forjando', tone: 'accent' };
-  if (p.qaPassed === false) return { label: 'Revisar', tone: 'warn' };
-  if (p.stage === 'published') return { label: 'Publicado', tone: 'ok' };
-  if (p.status === 'done') return { label: 'Listo', tone: 'ok' };
-  return { label: 'Pendiente', tone: 'neutral' };
-}
 
 function formatDuration(ms?: number): string {
   if (!ms) return '';
@@ -83,7 +75,7 @@ export class BibliotecaPage {
     return this.sortDesc() ? list : [...list].reverse();
   });
 
-  statusOf = statusOf;
+  statusOf = productionStatus;
   formatDuration = formatDuration;
 
   constructor() {

@@ -24,7 +24,7 @@ export class GeminiProvider implements AdapterCore {
     const secretName = config.secretRef ?? 'GEMINI_API_KEY';
     const apiKey = env[secretName];
     if (!apiKey) {
-      throw new ProviderError(`Falta el secreto: definí ${secretName} en .env`, 'gemini', false);
+      throw new ProviderError(`Falta el secreto ${secretName}: cargalo en Ajustes → Proveedores`, 'gemini', false);
     }
     this.client = new GoogleGenAI({ apiKey });
   }

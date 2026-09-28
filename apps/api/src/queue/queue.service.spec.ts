@@ -35,6 +35,7 @@ const ALL_CPU: Record<StageKey, Lane> = {
   visuals: 'cpu',
   render: 'cpu',
   qa: 'cpu',
+  archive: 'cpu',
 };
 
 const tick = () => new Promise<void>((r) => setImmediate(r));
@@ -92,7 +93,7 @@ class FakeRunner implements StageRunner {
           .update(productions)
           .set({
             inputHashes: { ...row.inputHashes, [stage]: `h-${stage}` },
-            status: stage === 'qa' ? 'done' : 'running',
+            status: stage === STAGE_ORDER[STAGE_ORDER.length - 1] ? 'done' : 'running',
             currentStep: stage,
           })
           .where(eq(productions.id, ref.productionId))
@@ -300,7 +301,7 @@ describe('QueueService', () => {
 
     const order = h.runner.calls.map((c) => c.productionId);
     // One cpu slot: each production runs all its stages before the next one starts.
-    expect(order).toEqual([...Array(7).fill(high.id), ...Array(7).fill(low.id), ...Array(7).fill(low2.id)]);
+    expect(order).toEqual([...Array(8).fill(high.id), ...Array(8).fill(low.id), ...Array(8).fill(low2.id)]);
   });
 
   it('retries retryable errors with backoff and fails fast on the rest', async () => {
@@ -362,6 +363,29 @@ describe('QueueService', () => {
     expect(retried.status).toBe('queued');
     expect(retried.attempts).toBe(0);
     expect((await h.svc.waitFor(p.id)).status).toBe('done');
+  });
+
+  it('retryFailed re-queues the latest failed job of each production and skips superseded ones', async () => {
+    h = setup();
+    h.runner.handlers.voice = async (_ref, _o, call) => {
+      if (call === 1) throw new Error('voz inválida');
+    };
+    const [a, b] = await h.svc.enqueue({ channelIds: [h.channelId], count: 2 });
+    expect((await h.svc.waitFor(a.id)).status).toBe('failed');
+    expect((await h.svc.waitFor(b.id)).status).toBe('failed');
+
+    // A is redone from the script: its old failed voice job is superseded, not retried again.
+    await h.svc.retryProduction(a.id, 'script');
+    expect((await h.svc.waitFor(a.id)).status).toBe('done');
+
+    expect(h.svc.state().retryableCount).toBe(1);
+    const result = await h.svc.retryFailed();
+    expect(result.retried.map((j) => j.productionId)).toEqual([b.id]);
+    expect(result.retried[0].status).toBe('queued');
+    expect((await h.svc.waitFor(b.id)).status).toBe('done');
+
+    expect(h.svc.state().retryableCount).toBe(0);
+    expect(await h.svc.retryFailed()).toEqual({ retried: [] });
   });
 
   it('skip stops the job and the chain: the production is canceled', async () => {
@@ -445,8 +469,22 @@ describe('QueueService', () => {
 
     await h.svc.retryProduction(p.id, 'render');
     await h.svc.waitFor(p.id);
-    expect(h.runner.stagesOf(p.id).slice(-2)).toEqual(['render', 'qa']);
+    expect(h.runner.stagesOf(p.id).slice(-3)).toEqual(['render', 'qa', 'archive']);
     await expect(h.svc.retryProduction('missing')).rejects.toThrow(/No existe/);
+  });
+
+  it('retryProduction with force passes it to the stage (the "Subir" button)', async () => {
+    h = setup();
+    const [p] = await h.svc.enqueue({ channelIds: [h.channelId], count: 1 });
+    await h.svc.waitFor(p.id);
+    let forced: boolean | undefined;
+    h.runner.handlers.archive = async (_r, o) => {
+      forced = o.force;
+    };
+    await h.svc.retryProduction(p.id, 'archive', { force: true });
+    expect((await h.svc.waitFor(p.id)).status).toBe('done');
+    expect(forced).toBe(true);
+    expect(h.runner.stagesOf(p.id).slice(-2)).toEqual(['archive', 'archive']);
   });
 
   it('emits queue, job, production and log events', async () => {
@@ -487,7 +525,7 @@ describe('QueueService', () => {
     expect(render?.lane).toBe('gpu');
     expect(render?.avgMs).toBe(30_010);
     expect(est.videos).toBe(2);
-    expect(est.jobs).toBe(14);
+    expect(est.jobs).toBe(16);
     // Two videos share the single GPU slot: at least two renders back to back.
     expect(est.etaMs).toBeGreaterThanOrEqual(2 * 30_000);
     expect(est.blockers).toEqual([]);

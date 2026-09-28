@@ -61,6 +61,21 @@ describe('FakeProvider', () => {
     }
   });
 
+  it('generates the requested number of distinct ideas when the schema asks for ideas', async () => {
+    const provider = new FakeProvider(config());
+    const result = await provider.generateText!(
+      { prompt: 'Proponé 4 ideas de video nuevas', jsonSchema: { type: 'object', properties: { ideas: { type: 'array' } } } },
+      testCallContext(),
+    );
+    const { ideas } = JSON.parse(result.text) as { ideas: { title: string; angle: string }[] };
+    expect(ideas).toHaveLength(4);
+    expect(new Set(ideas.map((i) => i.title)).size).toBe(4);
+    for (const idea of ideas) {
+      expect(idea.title.length).toBeGreaterThan(0);
+      expect(idea.angle.length).toBeGreaterThan(0);
+    }
+  });
+
   it('is deterministic from the prompt hash', async () => {
     const provider = new FakeProvider(config());
     const r1 = await provider.generateText!({ prompt: 'x', jsonSchema: { type: 'object' } }, testCallContext());

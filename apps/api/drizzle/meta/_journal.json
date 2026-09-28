@@ -22,6 +22,20 @@
       "when": 1790350523925,
       "tag": "0002_fase2_queue_ideas",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790545204169,
+      "tag": "0003_brand_kit",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790550372054,
+      "tag": "0004_storage",
+      "breakpoints": true
     }
   ]
 }

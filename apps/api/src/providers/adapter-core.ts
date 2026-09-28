@@ -3,7 +3,9 @@ import type {
   CallContext,
   ImageInput,
   StockItem,
+  PutOptions,
   StockQuery,
+  StorageLocation,
   StoredFile,
   TextInput,
   TextResult,
@@ -43,7 +45,9 @@ export interface AdapterCore {
   download?(item: StockItem, outPath: string, ctx: CallContext): Promise<{ path: string; usage: Usage }>;
   generateImage?(input: ImageInput, ctx: CallContext): Promise<{ path: string; usage: Usage }>;
   generateVideo?(input: VideoInput, ctx: CallContext): Promise<{ path: string; usage: Usage }>;
-  put?(localPath: string, remotePath: string, ctx: CallContext): Promise<StoredFile>;
-  get?(remoteId: string, localPath: string, ctx: CallContext): Promise<void>;
+  put?(localPath: string, remotePath: string, ctx: CallContext, opts?: PutOptions): Promise<{ file: StoredFile; usage: Usage }>;
+  get?(remoteId: string, localPath: string, ctx: CallContext): Promise<{ usage: Usage }>;
   exists?(remotePath: string): Promise<StoredFile | null>;
+  list?(): Promise<StoredFile[]>;
+  location?(): Promise<StorageLocation>;
 }

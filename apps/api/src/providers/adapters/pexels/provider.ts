@@ -49,7 +49,7 @@ export class PexelsProvider implements AdapterCore {
     const secretName = this.config.secretRef ?? 'PEXELS_API_KEY';
     const key = this.env[secretName];
     if (!key) {
-      throw new ProviderError(`Falta el secreto: definí ${secretName} en .env`, 'pexels', false);
+      throw new ProviderError(`Falta el secreto ${secretName}: cargalo en Ajustes → Proveedores`, 'pexels', false);
     }
     return key;
   }

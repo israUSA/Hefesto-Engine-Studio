@@ -5,9 +5,10 @@ import { HttpApiModule } from '../http/http-api.module';
 import { PipelineModule } from '../pipeline/pipeline.module';
 import { QueueModule } from '../queue/queue.module';
 import { SecretsModule } from '../secrets/secrets.module';
+import { StorageModule } from '../storage/storage.module';
 import { SystemModule } from '../system/system.module';
 
 @Module({
-  imports: [SecretsModule, EventsModule, DbModule, PipelineModule, QueueModule, SystemModule, HttpApiModule],
+  imports: [SecretsModule, EventsModule, DbModule, PipelineModule, QueueModule, StorageModule, SystemModule, HttpApiModule],
 })
 export class AppModule {}

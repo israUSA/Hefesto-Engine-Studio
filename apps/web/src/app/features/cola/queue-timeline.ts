@@ -10,6 +10,7 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Imágenes',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 const PX_PER_MIN = 44;
@@ -209,11 +210,13 @@ export class QueueTimeline {
   });
 
   readonly ticks = computed(() => {
-    const window = this.windowMs();
-    const step = window / RULER_TICKS;
-    return Array.from({ length: RULER_TICKS }, (_, i) => {
-      const ms = step * (i + 1);
-      return { ms, label: `+${Math.round(ms / 60000)} min` };
+    // Whole-minute steps: an even split of a 5-min window rounded to "+1 +2 +3 +3 +4 +5".
+    const windowMin = this.windowMs() / 60_000;
+    const stepMin = Math.max(1, Math.ceil(windowMin / RULER_TICKS));
+    const count = Math.min(RULER_TICKS, Math.floor(windowMin / stepMin));
+    return Array.from({ length: count }, (_, i) => {
+      const min = stepMin * (i + 1);
+      return { ms: min * 60_000, label: `+${min} min` };
     });
   });
 

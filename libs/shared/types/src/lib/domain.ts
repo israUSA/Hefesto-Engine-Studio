@@ -24,7 +24,44 @@ export interface Channel {
   active: boolean;
   voice: VoiceProfile;
   visualStyle: VisualStyle;
+  brandKit: BrandKit;
+  /** Upload finished videos to the storage provider after a passing QA (docs/06). */
+  autoArchive: boolean;
 }
+
+/**
+ * Channel look applied to every video. Today: the karaoke subtitles (`subs.ass`).
+ * Watermark, intro/outro and music join in Fase 4 (docs/03 · BrandKit).
+ */
+export interface BrandKit {
+  /** Subtitle font family; one of SUBTITLE_FONTS (bundled in data/fonts). */
+  subtitleFont: string;
+  /** Subtitle size in px on the 1080×1920 frame. */
+  subtitleSize: number;
+  /** "#RRGGBB" of the words not being spoken. */
+  textColor: string;
+  /** "#RRGGBB" of the word being spoken (karaoke). */
+  highlightColor: string;
+  /** "#RRGGBB" of the text outline. */
+  outlineColor: string;
+  uppercase: boolean;
+}
+
+export const DEFAULT_BRAND_KIT: BrandKit = {
+  subtitleFont: 'Archivo Black',
+  subtitleSize: 84,
+  textColor: '#FFFFFF',
+  highlightColor: '#FFD23F',
+  outlineColor: '#000000',
+  uppercase: true,
+};
+
+export const SUBTITLE_SIZE_RANGE = { min: 56, max: 120 } as const;
+
+/** Fonts the renderer can use without installing anything (OFL files in data/fonts). */
+export const SUBTITLE_FONTS: readonly { family: string; file: string }[] = [
+  { family: 'Archivo Black', file: 'ArchivoBlack-Regular.ttf' },
+];
 
 export interface VoiceProfile {
   /** ProviderConfig id; null = global binding. */

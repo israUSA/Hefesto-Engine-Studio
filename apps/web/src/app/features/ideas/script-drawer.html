@@ -71,8 +71,8 @@
         <hf-button variant="secondary" [loading]="saving()" [disabled]="!dirty()" (pressed)="save()">
           Guardar cambios
         </hf-button>
-        <hf-button variant="danger" [loading]="deciding()" (pressed)="decide('rejected')">Rechazar</hf-button>
-        <hf-button variant="primary" [loading]="deciding()" (pressed)="decide('approved')">
+        <hf-button variant="danger" [loading]="deciding()" [disabled]="s.status === 'rejected'" (pressed)="decide('rejected')">Rechazar</hf-button>
+        <hf-button variant="primary" [loading]="deciding()" [disabled]="s.status === 'approved'" (pressed)="decide('approved')">
           <hf-icon name="check" [size]="13" />
           Aprobar
         </hf-button>

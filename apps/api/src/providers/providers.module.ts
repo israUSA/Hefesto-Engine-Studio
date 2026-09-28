@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { fakeProviderFactory } from './adapters/fake';
 import { geminiProviderFactory } from './adapters/gemini';
+import { googleDriveProviderFactory } from './adapters/google-drive';
+import { localFolderProviderFactory } from './adapters/local-folder';
 import { openAiCompatibleProviderFactory } from './adapters/openai-compatible';
 import { pexelsProviderFactory } from './adapters/pexels';
 import type { BindingSource } from './provider-registry';
@@ -25,6 +27,8 @@ export const PROVIDER_REGISTRY = Symbol('PROVIDER_REGISTRY');
         registry.register(geminiProviderFactory);
         registry.register(openAiCompatibleProviderFactory);
         registry.register(pexelsProviderFactory);
+        registry.register(googleDriveProviderFactory);
+        registry.register(localFolderProviderFactory);
         return registry;
       },
       inject: [BINDING_SOURCE],

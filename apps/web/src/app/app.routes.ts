@@ -30,8 +30,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'drive',
-    component: PlaceholderPage,
-    data: { title: 'Drive', detail: 'La vista de almacenamiento llega en la próxima entrega.' },
+    loadChildren: () => import('./features/drive/drive.routes').then((m) => m.driveRoutes),
   },
   {
     path: 'costos',

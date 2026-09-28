@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { Channel } from '@hefesto/shared-types';
+import { DEFAULT_BRAND_KIT, type BrandKit, type Channel } from '@hefesto/shared-types';
 import { eq } from 'drizzle-orm';
 import { DB, type DbInstance } from '../db.token';
 import { channels } from '../schema';
 import { newId, nowIso } from '../util';
 
-export type NewChannel = Omit<Channel, 'id'> & { id?: string };
+export type NewChannel = Omit<Channel, 'id' | 'brandKit' | 'autoArchive'> & { id?: string; brandKit?: BrandKit; autoArchive?: boolean };
 
 function toDomain(row: typeof channels.$inferSelect): Channel {
   return {
@@ -25,6 +25,8 @@ function toDomain(row: typeof channels.$inferSelect): Channel {
     active: row.active,
     voice: row.voiceProfile,
     visualStyle: row.visualStyle,
+    brandKit: { ...DEFAULT_BRAND_KIT, ...(row.brandKit ?? {}) },
+    autoArchive: row.autoArchive,
   };
 }
 
@@ -65,6 +67,8 @@ export class ChannelsRepository {
         durationTarget: channel.durationTarget,
         voiceProfile: channel.voice,
         visualStyle: channel.visualStyle,
+        brandKit: channel.brandKit ?? DEFAULT_BRAND_KIT,
+        autoArchive: channel.autoArchive ?? true,
         aiLabel: channel.aiLabel,
         monetized: channel.monetized,
         active: channel.active,
@@ -91,6 +95,8 @@ export class ChannelsRepository {
     if (patch.durationTarget !== undefined) set.durationTarget = patch.durationTarget;
     if (patch.voice !== undefined) set.voiceProfile = patch.voice;
     if (patch.visualStyle !== undefined) set.visualStyle = patch.visualStyle;
+    if (patch.brandKit !== undefined) set.brandKit = patch.brandKit;
+    if (patch.autoArchive !== undefined) set.autoArchive = patch.autoArchive;
     if (patch.aiLabel !== undefined) set.aiLabel = patch.aiLabel;
     if (patch.monetized !== undefined) set.monetized = patch.monetized;
     if (patch.active !== undefined) set.active = patch.active;
@@ -122,6 +128,7 @@ export class ChannelsRepository {
         durationTarget: channel.durationTarget,
         voiceProfile: channel.voice,
         visualStyle: channel.visualStyle,
+        ...(channel.brandKit && { brandKit: channel.brandKit }),
         aiLabel: channel.aiLabel,
         monetized: channel.monetized,
         active: channel.active,

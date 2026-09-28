@@ -12,6 +12,7 @@ type Row = {
   hook: string | null;
   metadata: Record<string, { title?: string } | undefined> | null;
   costUsd: number;
+  remoteRender: number;
 };
 
 /** Reads `ProductionSummary` DTOs straight from the DB (live cost from `cost_entries`). */
@@ -35,6 +36,7 @@ export class ProductionSummaryReader {
         hook: scripts.hook,
         metadata: scripts.metadata,
         costUsd: sql<number>`(SELECT coalesce(sum(cost_usd), 0) FROM cost_entries WHERE production_id = ${productions.id})`,
+        remoteRender: sql<number>`(SELECT count(*) FROM remote_files WHERE production_id = ${productions.id} AND kind = 'render' AND present = 1)`,
       })
       .from(productions)
       .leftJoin(channels, eq(channels.id, productions.channelId))
@@ -72,7 +74,8 @@ function toSummary(r: Row): ProductionSummary {
     qaPassed: p.stage === 'qa_passed' ? true : p.stage === 'qa_failed' ? false : undefined,
     costUsd: Number(r.costUsd ?? p.costUsd ?? 0),
     thumbUrl: rendered ? `/api/files/${p.id}/thumb.jpg` : undefined,
-    videoUrl: rendered ? `/api/files/${p.id}/render.mp4` : undefined,
+    videoUrl: rendered && !p.freedAt ? `/api/files/${p.id}/render.mp4` : undefined,
+    archive: rendered ? { remote: r.remoteRender > 0, onDisk: !p.freedAt } : undefined,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
     error: p.error ?? undefined,

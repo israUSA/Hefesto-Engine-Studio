@@ -5,24 +5,34 @@
         Cola
         @if (queue()) {
           <span class="hf-cola__title-sep">·</span>
-          <em>termina a las {{ finishClock() }}</em>
+          @if (activeCount() > 0) {
+            <em>termina a las {{ finishClock() }}</em>
+          } @else {
+            <em>al día</em>
+          }
         }
       </h1>
       @if (queue()) {
         <p class="hf-cola__subline">
-          {{ totalTasks() }} tarea{{ totalTasks() === 1 ? '' : 's' }} · {{ runningCount() }} corriendo
-          @if (failedCount() > 0) {
-            · {{ failedCount() }} con error
+          @if (activeCount() > 0) {
+            {{ activeCount() }} pendiente{{ activeCount() === 1 ? '' : 's' }} · {{ runningCount() }} corriendo
+          } @else {
+            Sin tareas pendientes
           }
-          · ETA estimado según el historial de tareas
+          @if (retryableCount() > 0) {
+            · {{ retryableCount() }} con error
+          }
+          @if (activeCount() > 0) {
+            · ETA estimado según el historial de tareas
+          }
         </p>
       }
     </div>
     <div class="hf-cola__actions">
-      @if (failedCount() > 0) {
+      @if (retryableCount() > 0) {
         <hf-button variant="secondary" [loading]="retryingAll()" (pressed)="retryAllFailed()">
           <hf-icon name="refresh" [size]="13" />
-          Reintentar fallidos · {{ failedCount() }}
+          Reintentar fallidos · {{ retryableCount() }}
         </hf-button>
       }
       <hf-button variant="secondary" [loading]="pausing()" (pressed)="togglePause()">

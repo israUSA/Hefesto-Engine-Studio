@@ -116,7 +116,7 @@ El QA es el mismo para todos los proveedores.
 |---|---|
 | 1 | Contrato, manifiesto y registro · `fake` · **OpenAI-compatible** (sirve para Ollama) · Gemini (texto y TTS) · Pexels · whisper.cpp (comando) · almacenamiento en carpeta local |
 | 2 | Pantalla de proveedores en Ajustes con "Probar" · asignación por canal y rol · respaldos · **manual** |
-| 3 | Google Drive como `StorageProvider` |
+| 3 | ✅ Google Drive (`google-drive`) y carpeta local o NAS (`local-folder`) como `StorageProvider` |
 | 4 | Imágenes (Gemini, fal) · música · sidecar Hefesto · Kokoro |
 | 5 | `PublishTarget`: YouTube, TikTok |
 | 6 | `Notifier`: Windows, Telegram, webhook |

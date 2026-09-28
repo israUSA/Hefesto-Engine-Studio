@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { ProductionDetail, StageKey } from '@hefesto/shared-types';
+import type { ProductionDetail, ScriptStatus, StageKey } from '@hefesto/shared-types';
 import { STAGE_ORDER } from '@hefesto/shared-types';
 import { Button, Dialog, EmptyState, Icon, Select, SelectOption, Skeleton, StatusChip, Tag } from '@hefesto/web-ui';
 import { ApiClient } from '../../core/api-client';
 import { LiveEvents } from '../../core/live-events';
+import { productionStatus } from '../../core/production-status';
 import { ToastService } from '../../core/toast.service';
 
 const STAGE_LABEL: Record<StageKey, string> = {
@@ -15,9 +16,16 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Visuales',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
-type StageState = 'pending' | 'running' | 'done' | 'skipped' | 'failed';
+const SCRIPT_STATUS_LABEL: Record<ScriptStatus, string> = {
+  draft: 'Borrador',
+  approved: 'Aprobado',
+  rejected: 'Rechazado',
+};
+
+type StageState ='pending' | 'running' | 'done' | 'skipped' | 'failed';
 
 function stageTone(state: StageState): 'ok' | 'accent' | 'danger' | 'steel' | 'neutral' {
   if (state === 'done') return 'ok';
@@ -64,6 +72,8 @@ export class ProductionInspector {
   readonly retrying = signal(false);
   readonly deleteOpen = signal(false);
   readonly deleting = signal(false);
+  readonly restoring = signal(false);
+  readonly uploading = signal(false);
 
   readonly stageOptions: SelectOption[] = [
     { value: '', label: 'Desde el principio' },
@@ -79,6 +89,12 @@ export class ProductionInspector {
 
   formatDuration = formatDuration;
   stageTone = stageTone;
+
+  statusOf = productionStatus;
+
+  scriptStatusLabel(status: ScriptStatus): string {
+    return SCRIPT_STATUS_LABEL[status] ?? status;
+  }
 
   stageLabel(key: StageKey): string {
     return STAGE_LABEL[key] ?? key;
@@ -146,6 +162,42 @@ export class ProductionInspector {
       error: () => {
         this.retrying.set(false);
         this.toasts.error('No se pudo reencolar la producción.');
+      },
+    });
+  }
+
+  /** Downloads the freed render and voice back from the archive. */
+  restore(): void {
+    const detail = this.detail();
+    if (!detail) return;
+    this.restoring.set(true);
+    this.api.restoreProduction(detail.id).subscribe({
+      next: () => {
+        this.restoring.set(false);
+        this.toasts.ok('Video de vuelta en el disco.');
+        this.load(detail.id);
+      },
+      error: (err) => {
+        this.restoring.set(false);
+        this.toasts.error(err?.error?.message ?? 'No se pudo traer el video.');
+      },
+    });
+  }
+
+  /** "Subir": archives now, even if the channel doesn't archive automatically or QA failed. */
+  upload(): void {
+    const detail = this.detail();
+    if (!detail) return;
+    this.uploading.set(true);
+    this.api.uploadToStorage([detail.id]).subscribe({
+      next: () => {
+        this.uploading.set(false);
+        this.toasts.ok('En la cola para subir al archivo.');
+        this.retried.emit();
+      },
+      error: (err) => {
+        this.uploading.set(false);
+        this.toasts.error(err?.error?.message ?? 'No se pudo encolar la subida.');
       },
     });
   }

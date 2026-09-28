@@ -37,13 +37,16 @@ Channel ─┬─< Idea ──< Script ──< Scene
 | bibleTranslation | string? | `RV1909` (ver [08](08-nicho-cristiano.md)) |
 | durationTarget | {min, max} s | por ejemplo 30–60 |
 | brandKitId, voiceProfileId, visualStyleId | fk | |
-| driveFolderId | string? | |
+| driveFolderId | string? | (sin uso: la carpeta del canal se busca por nombre) |
+| autoArchive | bool | sube cada video al archivo después de un QA aprobado |
 | aiLabel | bool | marcar contenido IA al publicar |
 | monetized | bool | bloquea proveedores con licencia no comercial (ADR-008) |
 | active | bool | |
 
 ### BrandKit
 Fuente de títulos y subtítulos, colores (primario, resaltado), estilo de subtítulos (preset ASS), watermark (imagen, posición, opacidad), intro y outro opcionales, pack de música (lista de pistas y volumen), plantilla de miniatura.
+
+**Implementado (Fase 2)**: JSON `channels.brand_kit` con `subtitleFont` (una de `SUBTITLE_FONTS`, archivos OFL en `data/fonts`), `subtitleSize` (56–120 px sobre 1080×1920), `textColor`, `highlightColor` (palabra activa), `outlineColor` y `uppercase`. Un canal sin brand kit usa `DEFAULT_BRAND_KIT`. Se edita en Canal → Identidad con vista previa y entra en el hash de la etapa de subtítulos: cambiarlo rehace subtítulos y render, no la voz ni las imágenes. Watermark, intro/outro, música y miniatura quedan para la Fase 4.
 
 ### VoiceProfile
 `providerConfigId`, `voiceId`, `language`, `stylePrompt` (Gemini TTS: "cálida, pausada, reverente"), `speed`, `pauseBeforeAmenMs` y otros parámetros específicos del proveedor en JSON. Los valores del canal **se aplican encima** de los valores base, como en ZAP.
@@ -70,6 +73,7 @@ Una ejecución de un guion para un canal y un formato.
 | status | `pending` \| `running` \| `done` \| `failed` \| `canceled` |
 | inputHashes | JSON por etapa: base de la idempotencia |
 | renderPath, durationMs | |
+| freedAt | "Liberar espacio" borró render y voz del disco (siguen en el archivo) |
 | costUsd | suma de sus CostEntry |
 
 **Etapas** (`stage`):
@@ -83,8 +87,8 @@ scripted → voiced → transcribed → visuals_ready → rendered → qa_passed
 ### Asset
 `productionId?`, `kind` (`voice` \| `words` \| `subs` \| `scene-image` \| `scene-video` \| `music` \| `render` \| `thumb`), `localPath?`, `sha256`, `sizeBytes`, `provider`, `prompt?`, `reusable` (bool, para el banco de recursos), `tags[]`.
 
-### DriveFile
-`assetId`, `driveId`, `folderId`, `md5`, `syncedAt`. Un recurso se considera **hecho** si existe en disco **o** en Drive.
+### DriveFile (`remote_files`)
+**Implementado (Fase 3)** para cualquier `StorageProvider`: `productionId`, `channelId`, `kind` (`render` | `thumb` | `voice` | `script`), `localName`, `providerConfigId`, `remoteId`, `remotePath`, `md5`, `sizeBytes`, `present` (falso si "Sincronizar" no lo encontró), `syncedAt`. Una fila por producción y tipo. Un recurso se considera **hecho** si existe en disco **o** en el archivo.
 
 ### QaReport
 `productionId`, `checks[]` (`{name, passed, value, threshold}`), `passed`.

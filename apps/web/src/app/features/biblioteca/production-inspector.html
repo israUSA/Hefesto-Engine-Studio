@@ -19,6 +19,14 @@
     <div class="hf-inspector__player">
       @if (d.videoUrl) {
         <video #videoEl [src]="d.videoUrl" controls preload="metadata" [attr.poster]="d.thumbUrl || null"></video>
+      } @else if (d.archive && !d.archive.onDisk) {
+        <div class="hf-inspector__player-empty">
+          <hf-icon name="cloud-download" [size]="24" />
+          <span>El video está en el archivo, no en el disco</span>
+          <hf-button variant="secondary" [loading]="restoring()" [disabled]="!d.archive.remote" (pressed)="restore()">
+            Traer de vuelta
+          </hf-button>
+        </div>
       } @else {
         <div class="hf-inspector__player-empty">
           <hf-icon name="clapperboard" [size]="24" />
@@ -30,9 +38,7 @@
     <div class="hf-inspector__meta">
       <div class="hf-inspector__meta-row">
         <span>Estado</span>
-        <hf-status-chip [tone]="d.status === 'failed' ? 'danger' : d.status === 'running' ? 'accent' : d.qaPassed === false ? 'warn' : 'ok'" [pulse]="d.status === 'running'">
-          {{ d.status === 'failed' ? 'Falló' : d.status === 'running' ? 'Forjando' : d.qaPassed === false ? 'Revisar' : d.status === 'done' ? 'Listo' : 'Pendiente' }}
-        </hf-status-chip>
+        <hf-status-chip [tone]="statusOf(d).tone" [pulse]="d.status === 'running'">{{ statusOf(d).label }}</hf-status-chip>
       </div>
       @if (qaSummary(); as qa) {
         <div class="hf-inspector__meta-row">
@@ -48,9 +54,15 @@
         <span>Costo</span>
         <span class="hf-inspector__meta-value">${{ d.costUsd.toFixed(2) }}</span>
       </div>
+      @if (d.archive; as a) {
+        <div class="hf-inspector__meta-row">
+          <span>Archivo</span>
+          <hf-tag [tone]="a.remote ? 'accent' : 'neutral'">{{ a.remote ? (a.onDisk ? 'Disco y archivo' : 'Solo en el archivo') : 'Solo en disco' }}</hf-tag>
+        </div>
+      }
       <div class="hf-inspector__meta-row">
         <span>Guion</span>
-        <hf-tag [tone]="d.script.status === 'approved' ? 'accent' : 'neutral'">{{ d.script.status }}</hf-tag>
+        <hf-tag [tone]="d.script.status === 'approved' ? 'accent' : 'neutral'">{{ scriptStatusLabel(d.script.status) }}</hf-tag>
       </div>
     </div>
 
@@ -107,6 +119,12 @@
           Rehacer
         </hf-button>
       </div>
+      @if (d.archive && !d.archive.remote && d.status !== 'running' && d.status !== 'pending') {
+        <hf-button variant="secondary" [loading]="uploading()" (pressed)="upload()">
+          <hf-icon name="cloud-upload" [size]="13" />
+          Subir al archivo
+        </hf-button>
+      }
       <hf-button variant="danger" (pressed)="deleteOpen.set(true)">
         <hf-icon name="trash" [size]="13" />
         Eliminar producción
@@ -116,7 +134,10 @@
 </div>
 
 <hf-dialog [open]="deleteOpen()" title="Eliminar producción" (closed)="deleteOpen.set(false)">
-  <p>Se borrará el video, sus escenas y su costo asociado. Esta acción no se puede deshacer.</p>
+  <p>
+    Se borrará el video del disco, sus escenas y su costo asociado. Esta acción no se puede deshacer. Si estaba archivado, la copia
+    del archivo (Drive o carpeta) no se toca.
+  </p>
   <div footer>
     <hf-button variant="secondary" (pressed)="deleteOpen.set(false)">Cancelar</hf-button>
     <hf-button variant="danger" [loading]="deleting()" (pressed)="confirmDelete()">Eliminar</hf-button>

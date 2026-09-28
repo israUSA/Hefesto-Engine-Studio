@@ -219,6 +219,7 @@ export class ChannelFormDialog {
       active: true,
       voice: d.voice ?? { voiceId: '', language: 'es' },
       visualStyle: d.visualStyle ?? { source: 'stock', motion: 'kenburns' },
+      brandKit: d.brandKit,
     };
 
     this.saving.set(true);

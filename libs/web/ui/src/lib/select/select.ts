@@ -26,7 +26,7 @@ const noop = (): void => undefined;
         (blur)="onTouched()"
       >
         @for (opt of options(); track opt.value) {
-          <option [value]="opt.value">{{ opt.label }}</option>
+          <option [value]="opt.value" [selected]="opt.value === (value ?? '')">{{ opt.label }}</option>
         }
       </select>
       <hf-icon name="chevron-down" [size]="14" class="hf-select__chevron" />

@@ -1,0 +1,126 @@
+.hf-kit {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.hf-kit__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.hf-kit__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+
+.hf-kit__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+.hf-kit__range {
+  height: 36px;
+  accent-color: var(--accent);
+}
+
+.hf-kit__color {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.hf-kit__swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.hf-kit__swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.hf-kit__swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+.hf-kit__hex {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+}
+
+.hf-kit__hex:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.hf-kit__check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  cursor: pointer;
+  width: fit-content;
+}
+
+.hf-kit__check input {
+  accent-color: var(--accent);
+}
+
+.hf-kit__preview {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-align: center;
+}
+
+/* Same proportions as the render: 1080×1920, text kept above the bottom 22% and 12% from the sides. */
+.hf-kit__frame {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  /* Stand-in for a video frame (content, not UI): a mid-tone so every text color reads. */
+  background: #2b3a4a;
+  overflow: hidden;
+}
+
+.hf-kit__line {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 22%;
+  margin: 0;
+  text-align: center;
+  line-height: 1.15;
+  paint-order: stroke fill;
+  overflow-wrap: anywhere;
+}

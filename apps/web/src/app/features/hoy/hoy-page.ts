@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { Board, ChannelSummary, ProductionSummary, ProviderDto, StageKey } from '@hefesto/shared-types';
-import { Button, EmptyState, Icon, IconName, Metric, ProgressBar, Skeleton, StatusChip, Thumb9x16 } from '@hefesto/web-ui';
+import { Button, EmptyState, Icon, Metric, ProgressBar, Skeleton, StatusChip } from '@hefesto/web-ui';
 import { forkJoin } from 'rxjs';
 import { ApiClient } from '../../core/api-client';
 import { LiveEvents } from '../../core/live-events';
+import { HoyChannelRow, type ChannelRow } from './hoy-channel-row';
+import { HoyOnboarding } from './hoy-onboarding';
 
 const REFRESH_MS = 20000;
 const RECENT_WINDOW = 100;
@@ -17,13 +19,8 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Visuales',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
-
-interface ChannelRow {
-  summary: ChannelSummary;
-  recent: ProductionSummary[];
-  platformIcon: IconName;
-}
 
 interface AttentionRow {
   production: ProductionSummary;
@@ -46,7 +43,7 @@ function isoWeek(date: Date): number {
 @Component({
   selector: 'hf-hoy-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, Button, EmptyState, Icon, Metric, ProgressBar, Skeleton, StatusChip, Thumb9x16],
+  imports: [RouterLink, Button, EmptyState, Icon, Metric, ProgressBar, Skeleton, StatusChip, HoyChannelRow, HoyOnboarding],
   templateUrl: './hoy-page.html',
   styleUrl: './hoy-page.css',
 })

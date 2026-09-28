@@ -22,6 +22,23 @@ export class RegistryProviderGateway implements ProviderGateway {
     return { result, providerConfigId: servedBy.configId };
   }
 
+  async boundConfigId(capability: Capability, scope: { channelId: string }): Promise<string | null> {
+    try {
+      return this.registry.resolve(capability as ResolvableCapability, scope).config.id;
+    } catch {
+      return null;
+    }
+  }
+
+  async callConfig<C extends ResolvableCapability, T>(
+    capability: C,
+    providerConfigId: string,
+    scope: { channelId: string },
+    fn: (provider: CapabilityMap[C]) => Promise<T>,
+  ): Promise<T> {
+    return fn(this.registry.resolveConfig(capability, providerConfigId, scope).provider);
+  }
+
   async describe(capability: Capability, scope: { channelId: string; role?: TextRole }): Promise<string> {
     const { config } = this.registry.resolve(capability as ResolvableCapability, scope);
     return [config.adapter, config.model ?? '', config.baseUrl ?? '', JSON.stringify(config.params)].join('|');

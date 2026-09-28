@@ -107,6 +107,6 @@ export class QueueEstimator {
 
 function describe(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err);
-  const secret = /Falta el secreto: definí (\S+)/.exec(message);
+  const secret = /Falta el secreto ([A-Z0-9_]+)/.exec(message);
   return secret ? `Falta ${secret[1]}` : message;
 }

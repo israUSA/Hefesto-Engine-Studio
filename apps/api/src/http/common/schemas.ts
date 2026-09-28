@@ -1,3 +1,4 @@
+import { SUBTITLE_FONTS, SUBTITLE_SIZE_RANGE } from '@hefesto/shared-types';
 import { z } from 'zod';
 
 /** Request body / query zod schemas for the REST layer (libs/shared/types/src/lib/api.ts). */
@@ -19,6 +20,17 @@ const visualStyleSchema = z.object({
   motion: z.enum(['kenburns', 'parallax', 'static']),
   transition: z.string().optional(),
 });
+const hexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Color en formato #RRGGBB');
+const brandKitSchema = z.object({
+  subtitleFont: z
+    .string()
+    .refine((f) => SUBTITLE_FONTS.some((font) => font.family === f), 'Fuente no disponible para el render'),
+  subtitleSize: z.number().int().min(SUBTITLE_SIZE_RANGE.min).max(SUBTITLE_SIZE_RANGE.max),
+  textColor: hexColorSchema,
+  highlightColor: hexColorSchema,
+  outlineColor: hexColorSchema,
+  uppercase: z.boolean(),
+});
 
 export const channelInputSchema = z.object({
   name: z.string().min(1),
@@ -36,6 +48,8 @@ export const channelInputSchema = z.object({
   active: z.boolean(),
   voice: voiceProfileSchema,
   visualStyle: visualStyleSchema,
+  brandKit: brandKitSchema.optional(),
+  autoArchive: z.boolean().optional(),
 });
 
 export const channelPatchSchema = channelInputSchema.partial();
