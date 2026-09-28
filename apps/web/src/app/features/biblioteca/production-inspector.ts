@@ -16,6 +16,7 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Visuales',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 const SCRIPT_STATUS_LABEL: Record<ScriptStatus, string> = {
@@ -71,6 +72,8 @@ export class ProductionInspector {
   readonly retrying = signal(false);
   readonly deleteOpen = signal(false);
   readonly deleting = signal(false);
+  readonly restoring = signal(false);
+  readonly uploading = signal(false);
 
   readonly stageOptions: SelectOption[] = [
     { value: '', label: 'Desde el principio' },
@@ -159,6 +162,42 @@ export class ProductionInspector {
       error: () => {
         this.retrying.set(false);
         this.toasts.error('No se pudo reencolar la producción.');
+      },
+    });
+  }
+
+  /** Downloads the freed render and voice back from the archive. */
+  restore(): void {
+    const detail = this.detail();
+    if (!detail) return;
+    this.restoring.set(true);
+    this.api.restoreProduction(detail.id).subscribe({
+      next: () => {
+        this.restoring.set(false);
+        this.toasts.ok('Video de vuelta en el disco.');
+        this.load(detail.id);
+      },
+      error: (err) => {
+        this.restoring.set(false);
+        this.toasts.error(err?.error?.message ?? 'No se pudo traer el video.');
+      },
+    });
+  }
+
+  /** "Subir": archives now, even if the channel doesn't archive automatically or QA failed. */
+  upload(): void {
+    const detail = this.detail();
+    if (!detail) return;
+    this.uploading.set(true);
+    this.api.uploadToStorage([detail.id]).subscribe({
+      next: () => {
+        this.uploading.set(false);
+        this.toasts.ok('En la cola para subir al archivo.');
+        this.retried.emit();
+      },
+      error: (err) => {
+        this.uploading.set(false);
+        this.toasts.error(err?.error?.message ?? 'No se pudo encolar la subida.');
       },
     });
   }

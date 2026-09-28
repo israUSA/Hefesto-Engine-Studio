@@ -32,7 +32,7 @@ export interface QueueApi {
   setPriority(jobId: string, priority: number): JobDto;
   setLaneConcurrency(lane: Lane, concurrency: number): QueueState;
   /** Re-queues a production from a stage (default: the first failed/pending one). */
-  retryProduction(productionId: string, fromStage?: StageKey): Promise<ProductionSummary>;
+  retryProduction(productionId: string, fromStage?: StageKey, opts?: { force?: boolean }): Promise<ProductionSummary>;
   /** Resolves when the production reaches done/failed/canceled (used by the CLI). */
   waitFor(productionId: string): Promise<ProductionSummary>;
 }

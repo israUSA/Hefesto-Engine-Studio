@@ -8,6 +8,9 @@ import type {
   ChannelSummary,
   ChannelTemplateDto,
   FontDto,
+  FreeSpaceResult,
+  GoogleAccountStatus,
+  GoogleClientRequest,
   GenerateIdeasRequest,
   GenerateScriptRequest,
   IdeaDto,
@@ -26,8 +29,11 @@ import type {
   ScriptDto,
   ScriptPatch,
   SecretDto,
+  StorageOverview,
+  StorageTargetRequest,
   SystemInfo,
   Telemetry,
+  UploadResult,
   VoicePreviewRequest,
   VoicePreviewResponse,
 } from '@hefesto/shared-types';
@@ -209,6 +215,47 @@ export class ApiClient {
 
   deleteSecret(name: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/secrets/${name}`);
+  }
+
+  // ── Storage (Drive) ─────────────────────────────────────────────────
+  getStorage(): Observable<StorageOverview> {
+    return this.http.get<StorageOverview>(`${this.base}/storage`);
+  }
+
+  setStorageTarget(target: StorageTargetRequest): Observable<StorageOverview> {
+    return this.http.put<StorageOverview>(`${this.base}/storage/target`, target);
+  }
+
+  syncStorage(): Observable<StorageOverview> {
+    return this.http.post<StorageOverview>(`${this.base}/storage/sync`, {});
+  }
+
+  uploadToStorage(productionIds?: string[]): Observable<UploadResult> {
+    return this.http.post<UploadResult>(`${this.base}/storage/upload`, { productionIds });
+  }
+
+  freeSpace(productionIds?: string[]): Observable<FreeSpaceResult> {
+    return this.http.post<FreeSpaceResult>(`${this.base}/storage/free`, { productionIds });
+  }
+
+  restoreProduction(id: string): Observable<ProductionSummary> {
+    return this.http.post<ProductionSummary>(`${this.base}/storage/productions/${id}/restore`, {});
+  }
+
+  getGoogleAccount(): Observable<GoogleAccountStatus> {
+    return this.http.get<GoogleAccountStatus>(`${this.base}/storage/google`);
+  }
+
+  setGoogleClient(client: GoogleClientRequest): Observable<GoogleAccountStatus> {
+    return this.http.put<GoogleAccountStatus>(`${this.base}/storage/google/client`, client);
+  }
+
+  connectGoogle(): Observable<{ authUrl: string }> {
+    return this.http.post<{ authUrl: string }>(`${this.base}/storage/google/connect`, {});
+  }
+
+  disconnectGoogle(): Observable<GoogleAccountStatus> {
+    return this.http.delete<GoogleAccountStatus>(`${this.base}/storage/google`);
   }
 
   // ── System ──────────────────────────────────────────────────────────

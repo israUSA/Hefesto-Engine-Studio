@@ -13,6 +13,7 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Visuales',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 /** Persistent top strip: shows the job currently forging, or an idle state. */

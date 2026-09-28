@@ -152,17 +152,35 @@ export interface VideoProvider extends Provider {
 
 // ── Storage ─────────────────────────────────────────────────────────────
 
+/** A file in the storage provider. `remotePath` uses '/' and is relative to the provider's root. */
 export interface StoredFile {
   remoteId: string;
   remotePath: string;
   sizeBytes: number;
+  /** Hex MD5 of the content, to verify an upload before freeing the local copy. */
   md5?: string;
 }
 
+export interface PutOptions {
+  mimeType?: string;
+  onProgress?: (sentBytes: number, totalBytes: number) => void;
+}
+
+export interface StorageLocation {
+  /** Root folder as the user would recognize it. */
+  root: string;
+  /** Link to open the root folder in a browser. */
+  webUrl?: string;
+}
+
 export interface StorageProvider extends Provider {
-  put(localPath: string, remotePath: string, ctx: CallContext): Promise<StoredFile>;
-  get(remoteId: string, localPath: string, ctx: CallContext): Promise<void>;
+  /** Uploads (or replaces) the file at `remotePath`, creating the folders it needs. */
+  put(localPath: string, remotePath: string, ctx: CallContext, opts?: PutOptions): Promise<{ file: StoredFile; usage: Usage }>;
+  get(remoteId: string, localPath: string, ctx: CallContext): Promise<{ usage: Usage }>;
   exists(remotePath: string): Promise<StoredFile | null>;
+  /** Every file under the app's root (for "Sincronizar"). */
+  list(): Promise<StoredFile[]>;
+  location(): Promise<StorageLocation>;
 }
 
 // ── Registry ────────────────────────────────────────────────────────────

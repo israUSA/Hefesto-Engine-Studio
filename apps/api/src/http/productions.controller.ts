@@ -24,7 +24,7 @@ import type {
 import { STAGE_ORDER } from '@hefesto/shared-types';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { paths } from '../config/env';
 import {
   ChannelsRepository,
@@ -32,6 +32,7 @@ import {
   type ProductionRow,
   ProductionsRepository,
   ProviderConfigsRepository,
+  RemoteFilesRepository,
   ScriptsRepository,
 } from '../db/repositories';
 import { sceneTimeline } from '../pipeline/timeline';
@@ -47,6 +48,7 @@ export class ProductionsController {
     private readonly scripts: ScriptsRepository,
     private readonly costs: CostEntriesRepository,
     private readonly providerConfigs: ProviderConfigsRepository,
+    private readonly remoteFiles: RemoteFilesRepository,
     @Optional() @Inject(QUEUE_API) private readonly queue: QueueApi | undefined,
   ) {}
 
@@ -58,7 +60,9 @@ export class ProductionsController {
   private toSummary(row: ProductionRow): ProductionSummary {
     const channel = this.channels.findById(row.channelId);
     const script = this.scripts.findById(row.scriptId);
-    const hasRender = Boolean(row.renderPath) && existsSync(row.renderPath ?? '');
+    const hasRender = Boolean(row.renderPath) && !row.freedAt && existsSync(row.renderPath ?? '');
+    const hasThumb = Boolean(row.renderPath) && existsSync(join(dirname(row.renderPath ?? ''), 'thumb.jpg'));
+    const remoteRender = this.remoteFiles.forProduction(row.id).some((f) => f.kind === 'render' && f.present);
     return {
       id: row.id,
       channelId: row.channelId,
@@ -71,8 +75,9 @@ export class ProductionsController {
       durationMs: row.durationMs ?? undefined,
       qaPassed: row.stage === 'qa_passed' ? true : row.stage === 'qa_failed' ? false : undefined,
       costUsd: row.costUsd,
-      thumbUrl: hasRender ? `/api/files/${row.id}/thumb.jpg` : undefined,
+      thumbUrl: hasThumb ? `/api/files/${row.id}/thumb.jpg` : undefined,
       videoUrl: hasRender ? `/api/files/${row.id}/render.mp4` : undefined,
+      archive: row.renderPath ? { remote: remoteRender, onDisk: !row.freedAt } : undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       error: row.error ?? undefined,
@@ -183,6 +188,8 @@ export class ProductionsController {
       const dir = paths.production(channel.slug, id);
       await rm(dir, { recursive: true, force: true });
     }
+    // The archived copies stay in the storage provider; only the index row goes.
+    this.remoteFiles.deleteForProduction(id);
     this.productions.delete(id);
   }
 }

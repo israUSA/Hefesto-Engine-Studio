@@ -9,6 +9,7 @@ export const DEFAULT_STAGE_MS: Record<StageKey, number> = {
   visuals: 15_000,
   render: 90_000,
   qa: 8_000,
+  archive: 10_000,
 };
 
 /** Lane guess for stages that aren't enqueued yet (no job, no provider resolved). */
@@ -20,6 +21,7 @@ export const DEFAULT_STAGE_LANE: Record<StageKey, Lane> = {
   visuals: 'net',
   render: 'cpu',
   qa: 'cpu',
+  archive: 'net',
 };
 
 export interface SimStep {

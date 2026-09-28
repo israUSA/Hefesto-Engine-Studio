@@ -6,4 +6,5 @@ export * from './retry';
 export * from './cost';
 export * from './wav';
 export * from './json-repair';
+export * from './storage-util';
 export * from './providers.module';

@@ -110,6 +110,14 @@
       <hf-brand-kit-editor [(kit)]="brandKit" />
     </section>
 
+    <section class="hf-identidad__section">
+      <h3 class="hf-identidad__heading">Archivo</h3>
+      <label class="hf-identidad__check">
+        <input type="checkbox" [(ngModel)]="autoArchive" />
+        Subir cada video al archivo (Drive o carpeta) cuando pasa el QA
+      </label>
+    </section>
+
     <div class="hf-identidad__actions">
       <hf-button variant="primary" [loading]="saving()" (pressed)="save()">
         <hf-icon name="check" [size]="14" />

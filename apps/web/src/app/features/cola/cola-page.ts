@@ -14,6 +14,7 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Imágenes',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 const LANE_LABEL: Record<Lane, string> = { gpu: 'GPU', net: 'Red', cpu: 'CPU' };

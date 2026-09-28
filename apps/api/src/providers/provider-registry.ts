@@ -154,7 +154,7 @@ export class ProviderRegistry {
     }
     if (config.secretRef && !this.env[config.secretRef]) {
       throw new ProviderError(
-        `Falta el secreto: definí ${config.secretRef} en .env para el proveedor "${config.name}"`,
+        `Falta el secreto ${config.secretRef} del proveedor "${config.name}": cargalo en Ajustes`,
         config.adapter,
         false,
       );
@@ -217,11 +217,15 @@ export class ProviderRegistry {
         this.require(core, 'put', capability);
         this.require(core, 'get', capability);
         this.require(core, 'exists', capability);
+        this.require(core, 'list', capability);
+        this.require(core, 'location', capability);
         return {
           ...base,
           put: core.put!.bind(core),
           get: core.get!.bind(core),
           exists: core.exists!.bind(core),
+          list: core.list!.bind(core),
+          location: core.location!.bind(core),
         } as unknown as CapabilityMap[C];
       default:
         throw new ProviderError(`Capacidad no soportada por el registro: "${capability}"`, core.manifest.adapter, false);

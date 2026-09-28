@@ -77,4 +77,6 @@ export interface JobPayload {
   notBefore?: number;
   /** The stage was up to date and didn't run: excluded from duration averages. */
   cached?: boolean;
+  /** Run even if up to date; for `archive`, upload even without a passing QA ("Subir"). */
+  force?: boolean;
 }

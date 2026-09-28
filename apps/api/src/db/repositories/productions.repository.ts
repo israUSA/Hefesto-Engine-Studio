@@ -42,6 +42,11 @@ export class ProductionsRepository {
       .get();
   }
 
+  /** `freedAt` = the heavy files were deleted from disk (they stay in the remote); null = back on disk. */
+  setFreed(id: string, freedAt: string | null): void {
+    this.db.update(productions).set({ freedAt, updatedAt: nowIso() }).where(eq(productions.id, id)).run();
+  }
+
   delete(id: string): void {
     this.db.delete(productions).where(eq(productions.id, id)).run();
   }

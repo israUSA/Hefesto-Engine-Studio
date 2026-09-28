@@ -8,11 +8,12 @@ import {
   ChannelsRepository,
   CostEntriesRepository,
   ProductionsRepository,
+  RemoteFilesRepository,
 } from '../../db/repositories';
 import { productions, scenes, scripts } from '../../db/schema';
 import { newId, nowIso } from '../../db/util';
 import { sha256File } from '../hash';
-import type { ProductionRecord, ProductionStore, StoredScript } from '../ports';
+import type { ProductionRecord, ProductionStore, RemoteFileRecord, StoredScript } from '../ports';
 import { keywordsFromPrompt } from '../keywords';
 
 @Injectable()
@@ -25,6 +26,7 @@ export class DbProductionStore implements ProductionStore {
     private readonly productions: ProductionsRepository,
     private readonly assets: AssetsRepository,
     private readonly costs: CostEntriesRepository,
+    private readonly remote: RemoteFilesRepository,
   ) {}
 
   async getChannelBySlug(slug: string): Promise<Channel | null> {
@@ -116,6 +118,7 @@ export class DbProductionStore implements ProductionStore {
       stage: row.stage,
       status: row.status,
       inputHashes: row.inputHashes,
+      createdAt: row.createdAt,
     };
   }
 
@@ -166,6 +169,27 @@ export class DbProductionStore implements ProductionStore {
 
   async recordCost(entry: Parameters<ProductionStore['recordCost']>[0]): Promise<void> {
     this.costs.insert(entry);
+  }
+
+  async remoteFiles(productionId: string): Promise<RemoteFileRecord[]> {
+    return this.remote.forProduction(productionId).map((r) => ({
+      kind: r.kind,
+      localName: r.localName,
+      providerConfigId: r.providerConfigId,
+      remoteId: r.remoteId,
+      remotePath: r.remotePath,
+      md5: r.md5,
+      sizeBytes: r.sizeBytes,
+      present: r.present,
+    }));
+  }
+
+  async recordRemoteFile(productionId: string, channelId: string, file: Omit<RemoteFileRecord, 'present'>): Promise<void> {
+    this.remote.upsert({ productionId, channelId, ...file });
+  }
+
+  async setFreed(productionId: string, freed: boolean): Promise<void> {
+    this.productions.setFreed(productionId, freed ? nowIso() : null);
   }
 
   async recordAsset(asset: Parameters<ProductionStore['recordAsset']>[0]): Promise<void> {

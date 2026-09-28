@@ -1,8 +1,10 @@
 import type { Channel, ProductionStage, ProviderConfig, RunStatus, StageKey, WordTiming } from '@hefesto/shared-types';
 import { DEFAULT_BRAND_KIT, STAGE_ORDER } from '@hefesto/shared-types';
-import { copyFileSync, existsSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { InMemoryBindingSource, ProviderRegistry } from '../providers';
 import { fakeProviderFactory } from '../providers/adapters/fake';
+import { localFolderProviderFactory } from '../providers/adapters/local-folder';
 import { RegistryProviderGateway } from './adapters/provider-gateway';
 import type {
   BibleLookup,
@@ -10,6 +12,7 @@ import type {
   ProductionRecord,
   ProductionStore,
   ProviderGateway,
+  RemoteFileRecord,
   StoredScript,
 } from './ports';
 import { ProductionService, type ProductionEvent } from './production.service';
@@ -48,6 +51,7 @@ const CHANNEL: Channel = {
   voice: { voiceId: 'Kore', language: 'es' },
   visualStyle: { source: 'stock', motion: 'kenburns' },
   brandKit: DEFAULT_BRAND_KIT,
+  autoArchive: true,
 };
 
 type Row = ProductionRecord & { currentStep?: StageKey | null; progress?: number; error?: string; scriptId?: string };
@@ -57,6 +61,8 @@ class MemoryStore implements ProductionStore {
   rows = new Map<string, Row>();
   scripts = new Map<string, StoredScript & { channelId: string; status: string }>();
   costs: unknown[] = [];
+  remote = new Map<string, RemoteFileRecord[]>();
+  freed = new Map<string, boolean>();
 
   async getChannelBySlug(slug: string) {
     return [...this.channels.values()].find((c) => c.slug === slug) ?? null;
@@ -109,6 +115,17 @@ class MemoryStore implements ProductionStore {
   async recordAsset() {
     /* not needed */
   }
+  async remoteFiles(id: string) {
+    return (this.remote.get(id) ?? []).map((r) => ({ ...r }));
+  }
+  async recordRemoteFile(id: string, _channelId: string, file: Omit<RemoteFileRecord, 'present'>) {
+    const list = (this.remote.get(id) ?? []).filter((r) => r.kind !== file.kind);
+    list.push({ ...file, present: true });
+    this.remote.set(id, list);
+  }
+  async setFreed(id: string, freed: boolean) {
+    this.freed.set(id, freed);
+  }
 }
 
 const media: MediaTools = {
@@ -149,7 +166,10 @@ const bible: BibleLookup = {
   },
 };
 
-function makeGateway(): { gateway: ProviderGateway; calls: string[] } {
+/** Archive folder for the `local-folder` storage provider the tests bind. */
+const ARCHIVE_ROOT = join(env.home, 'archivo');
+
+function makeGateway(opts: { storage?: boolean } = {}): { gateway: ProviderGateway; calls: string[] } {
   const fake: ProviderConfig = {
     id: 'fake',
     name: 'fake',
@@ -162,8 +182,13 @@ function makeGateway(): { gateway: ProviderGateway; calls: string[] } {
   for (const [capability, role] of [['text', 'script'], ['tts'], ['transcribe'], ['stock']] as const) {
     source.addBinding({ id: capability, channelId: null, capability, role, providerConfigId: 'fake', params: {}, fallbackIds: [] });
   }
+  if (opts.storage !== false) {
+    source.addConfig({ id: 'archive', name: 'archivo', adapter: 'local-folder', capabilities: ['storage'], params: { root: ARCHIVE_ROOT }, enabled: true });
+    source.addBinding({ id: 'storage', channelId: null, capability: 'storage', providerConfigId: 'archive', params: {}, fallbackIds: [] });
+  }
   const registry = new ProviderRegistry(source, {});
   registry.register(fakeProviderFactory);
+  registry.register(localFolderProviderFactory);
   const inner = new RegistryProviderGateway(registry);
   const calls: string[] = [];
   const gateway: ProviderGateway = {
@@ -172,6 +197,11 @@ function makeGateway(): { gateway: ProviderGateway; calls: string[] } {
       return inner.call(capability, scope, fn);
     },
     describe: (capability, scope) => inner.describe(capability, scope),
+    boundConfigId: (capability, scope) => inner.boundConfigId(capability, scope),
+    callConfig: (capability, configId, scope, fn) => {
+      calls.push(capability);
+      return inner.callConfig(capability, configId, scope, fn);
+    },
   };
   return { gateway, calls };
 }
@@ -232,6 +262,8 @@ describe('ProductionService (per-stage pipeline)', () => {
       visuals: true,
       render: false,
       qa: false,
+      // The fake TTS ignores the speed: same files, same checksums, nothing to upload.
+      archive: true,
     });
   });
 
@@ -259,9 +291,74 @@ describe('ProductionService (per-stage pipeline)', () => {
       visuals: true,
       render: false,
       qa: false,
+      archive: true,
     });
     expect(write.mock.calls[0][1]).toMatchObject({ highlightColor: '#39FF88', fontSize: 96, fontName: 'Archivo Black' });
     write.mockRestore();
+  });
+
+  it('archives render, cover, voice and script with their checksum after a passing QA', async () => {
+    const { productionId } = await svc.produce(CHANNEL.slug);
+    const files = store.remote.get(productionId) ?? [];
+    expect(files.map((f) => f.kind).sort()).toEqual(['render', 'script', 'thumb', 'voice']);
+    const render = files.find((f) => f.kind === 'render') as RemoteFileRecord;
+    expect(render.remotePath).toMatch(/^Canal de prueba \(TikTok\)\/renders\/\d{4}-\d{2}\/[0-9a-f]{8}-[a-z0-9-]+\.mp4$/);
+    expect(readFileSync(join(ARCHIVE_ROOT, 'Hefesto Engine Studio', ...render.remotePath.split('/')), 'utf8')).toBe('mp4');
+    expect(render.md5).toMatch(/^[0-9a-f]{32}$/);
+    expect(render.providerConfigId).toBe('archive');
+    expect(store.costs).toContainEqual(expect.objectContaining({ operation: 'storage', costUsd: 0 }));
+  });
+
+  it('does not archive automatically when QA fails, the channel opts out or there is no storage', async () => {
+    const loud = jest.spyOn(media, 'measureLoudness').mockResolvedValue(-30);
+    const failed = await svc.produce(CHANNEL.slug);
+    expect(store.remote.get(failed.productionId)).toBeUndefined();
+    // "Subir" forces it.
+    expect((await svc.runStage({ productionId: failed.productionId }, 'archive', { force: true })).skipped).toBe(false);
+    expect(store.remote.get(failed.productionId)).toHaveLength(4);
+    loud.mockRestore();
+
+    (store.channels.get(CHANNEL.id) as Channel).autoArchive = false;
+    const optOut = await svc.produce(CHANNEL.slug);
+    expect(store.remote.get(optOut.productionId)).toBeUndefined();
+
+    (store.channels.get(CHANNEL.id) as Channel).autoArchive = true;
+    const bare = new ProductionService(store, makeGateway({ storage: false }).gateway, media, bible);
+    const none = await bare.produce(CHANNEL.slug);
+    expect(store.rows.get(none.productionId)?.inputHashes['archive']).toBeTruthy();
+    expect(store.remote.get(none.productionId)).toBeUndefined();
+  });
+
+  it('treats archived files as done and brings them back when a stage needs them', async () => {
+    const { productionId, dir } = await svc.produce(CHANNEL.slug);
+    unlinkSync(join(dir, 'render.mp4'));
+    unlinkSync(join(dir, 'voice.wav'));
+    calls.length = 0;
+
+    // Freed but archived: nothing is regenerated.
+    expect((await svc.runStage({ productionId }, 'voice')).skipped).toBe(true);
+    expect(existsSync(join(dir, 'voice.wav'))).toBe(false);
+
+    // Re-rendering needs the voice: it comes back from the archive, not from the TTS.
+    await svc.resetFrom(productionId, 'render');
+    expect((await svc.runStage({ productionId }, 'render')).skipped).toBe(false);
+    expect(existsSync(join(dir, 'voice.wav'))).toBe(true);
+    expect(store.freed.get(productionId)).toBe(false);
+    expect(calls).toEqual(['storage']);
+    expect(calls).not.toContain('tts');
+  });
+
+  it('uploads again only what changed or went missing in the remote', async () => {
+    const { productionId } = await svc.produce(CHANNEL.slug);
+    const before = store.remote.get(productionId) as RemoteFileRecord[];
+    store.remote.set(
+      productionId,
+      before.map((f) => (f.kind === 'thumb' ? { ...f, present: false } : f)),
+    );
+    calls.length = 0;
+    expect((await svc.runStage({ productionId }, 'archive')).skipped).toBe(false);
+    expect(calls).toEqual(['storage']);
+    expect(store.remote.get(productionId)?.every((f) => f.present)).toBe(true);
   });
 
   it('resetFrom forces a stage and the later ones to re-run', async () => {

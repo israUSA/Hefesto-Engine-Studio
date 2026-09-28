@@ -19,6 +19,7 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Visuales',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 interface AttentionRow {

@@ -24,8 +24,7 @@ export const ajustesRoutes: Route[] = [
       },
       {
         path: 'cuentas',
-        component: PlaceholderPage,
-        data: { title: 'Cuentas y OAuth', detail: 'La gestión de cuentas llega en la próxima entrega.' },
+        loadComponent: () => import('./cuentas/cuentas-page').then((m) => m.CuentasPage),
       },
       {
         path: 'limites',

@@ -1,4 +1,5 @@
 import type {
+  ArchivedKind,
   Capability,
   Channel,
   ProductionStage,
@@ -28,6 +29,20 @@ export interface ProductionRecord {
   stage?: ProductionStage;
   status: RunStatus;
   inputHashes: Record<string, string>;
+  createdAt?: string;
+}
+
+/** A production file archived in the storage provider (`remote_files`). */
+export interface RemoteFileRecord {
+  kind: ArchivedKind;
+  /** File name in the production folder: render.mp4, thumb.jpg, voice.wav, script.json. */
+  localName: string;
+  providerConfigId: string;
+  remoteId: string;
+  remotePath: string;
+  md5: string;
+  sizeBytes: number;
+  present: boolean;
 }
 
 export interface ProductionStore {
@@ -69,6 +84,11 @@ export interface ProductionStore {
     prompt?: string;
     inputHash: string;
   }): Promise<void>;
+  remoteFiles(productionId: string): Promise<RemoteFileRecord[]>;
+  /** Upserts the file of that kind (one per production and kind). */
+  recordRemoteFile(productionId: string, channelId: string, file: Omit<RemoteFileRecord, 'present'>): Promise<void>;
+  /** Heavy files back on disk (false) or deleted after archiving (true). */
+  setFreed(productionId: string, freed: boolean): Promise<void>;
 }
 
 export interface StoredScript {
@@ -94,6 +114,15 @@ export interface ProviderGateway {
     scope: { channelId: string; role?: TextRole },
     fn: (provider: CapabilityMap[C]) => Promise<T>,
   ): Promise<ProviderCall<T>>;
+  /** Config id of the provider assigned to the channel (or globally) for the capability; null = none. */
+  boundConfigId(capability: Capability, scope: { channelId: string }): Promise<string | null>;
+  /** Runs `fn` with a specific provider config (e.g. the one that holds an archived file). */
+  callConfig<C extends ResolvableCapability, T>(
+    capability: C,
+    providerConfigId: string,
+    scope: { channelId: string },
+    fn: (provider: CapabilityMap[C]) => Promise<T>,
+  ): Promise<T>;
   /** Stable identity of the provider that would serve the call (for input hashes). */
   describe(capability: Capability, scope: { channelId: string; role?: TextRole }): Promise<string>;
 }

@@ -21,8 +21,8 @@ import type {
 // DELETE /api/channels/:id             → 204 (soft: active = false)
 // POST   /api/channels/:id/voice-preview  VoicePreviewRequest → VoicePreviewResponse
 
-/** `brandKit` is optional on input: a missing one means DEFAULT_BRAND_KIT. */
-export type ChannelInput = Omit<Channel, 'id' | 'brandKit'> & { brandKit?: BrandKit };
+/** `brandKit` and `autoArchive` are optional on input: missing means DEFAULT_BRAND_KIT and `true`. */
+export type ChannelInput = Omit<Channel, 'id' | 'brandKit' | 'autoArchive'> & { brandKit?: BrandKit; autoArchive?: boolean };
 
 // GET    /api/fonts                     → FontDto[]   (subtitle fonts available to the renderer)
 // GET    /api/fonts/:file               → the font file (for the Identidad preview)
@@ -142,9 +142,10 @@ export interface Board {
 // DELETE /api/productions/:id           → 204 (deletes files too)
 // GET    /api/files/:productionId/:file → file stream with HTTP Range (render.mp4, thumb.jpg, voice.wav, scenes/00.jpg)
 
-export type StageKey = 'script' | 'voice' | 'transcribe' | 'subtitles' | 'visuals' | 'render' | 'qa';
+/** `archive` uploads the render, cover, voice and script to the storage provider (docs/06). */
+export type StageKey = 'script' | 'voice' | 'transcribe' | 'subtitles' | 'visuals' | 'render' | 'qa' | 'archive';
 
-export const STAGE_ORDER: StageKey[] = ['script', 'voice', 'transcribe', 'subtitles', 'visuals', 'render', 'qa'];
+export const STAGE_ORDER: StageKey[] = ['script', 'voice', 'transcribe', 'subtitles', 'visuals', 'render', 'qa', 'archive'];
 
 export interface ProduceRequest {
   channelIds: string[];
@@ -179,10 +180,22 @@ export interface ProductionSummary {
   qaPassed?: boolean;
   costUsd: number;
   thumbUrl?: string;
+  /** Only while the render is on disk (not after "Liberar espacio"). */
   videoUrl?: string;
+  /** Where the archived files are. Absent until the production has a render. */
+  archive?: ArchiveState;
   createdAt: string;
   updatedAt: string;
   error?: string;
+}
+
+/**
+ * `remote` = the render is in the storage provider with a verified checksum.
+ * `onDisk` = the heavy files (render, voice) are in HEFESTO_HOME; false after freeing space.
+ */
+export interface ArchiveState {
+  remote: boolean;
+  onDisk: boolean;
 }
 
 export interface QaCheckDto {
@@ -287,6 +300,96 @@ export interface SecretDto {
   updatedAt: string;
   source: 'vault' | 'env';
   usedBy: string[];
+}
+
+// ── Storage (Drive) ─────────────────────────────────────────────────────
+// GET    /api/storage                   → StorageOverview
+// PUT    /api/storage/target            StorageTargetRequest → StorageOverview   (which provider archives)
+// POST   /api/storage/sync              → StorageOverview   (reconciles the index with the remote)
+// POST   /api/storage/free              { productionIds?: string[] } → FreeSpaceResult
+// POST   /api/storage/upload            { productionIds?: string[] } → UploadResult   (enqueues `archive`, even if QA failed; none = every video not archived yet)
+// POST   /api/storage/productions/:id/restore  → ProductionSummary   (downloads the freed files back)
+// GET    /api/storage/google            → GoogleAccountStatus
+// PUT    /api/storage/google/client     GoogleClientRequest → GoogleAccountStatus   (write-only)
+// POST   /api/storage/google/connect    → { authUrl: string }   (open it in the browser)
+// GET    /api/storage/google/callback   OAuth redirect (loopback) → HTML page
+// DELETE /api/storage/google            → GoogleAccountStatus   (forgets the token)
+
+/** Files the `archive` stage uploads for each production (docs/06 · estructura). */
+export type ArchivedKind = 'render' | 'thumb' | 'voice' | 'script';
+
+export const ARCHIVED_KINDS: ArchivedKind[] = ['render', 'thumb', 'voice', 'script'];
+
+export interface StorageProviderInfo {
+  configId: string;
+  name: string;
+  adapter: string;
+  displayName: string;
+  /** Root folder shown to the user ("/Hefesto Engine Studio" or "D:\NAS\Hefesto Engine Studio"). */
+  root: string;
+  /** Link to open the root folder in the browser (Drive). */
+  webUrl?: string;
+  /** false when the provider is bound but can't be used (e.g. Google not connected). */
+  ready: boolean;
+  problem?: string;
+}
+
+export interface StorageChannelRow {
+  channelId: string;
+  channelName: string;
+  platform: Platform;
+  /** Productions with a render. */
+  videos: number;
+  /** In the remote (verified) and on disk. */
+  both: number;
+  /** Only in the remote: freed from disk. */
+  remoteOnly: number;
+  /** Only on disk: not archived yet. */
+  diskOnly: number;
+  /** Neither: freed and later missing from the remote (see "Sincronizar"). */
+  missing: number;
+  freeableBytes: number;
+}
+
+export interface StorageOverview {
+  /** Absent = nothing is archived: no storage provider bound. */
+  provider?: StorageProviderInfo;
+  lastSyncAt?: string;
+  remote: { bytes: number; byKind: Record<ArchivedKind, { count: number; bytes: number }> };
+  /** Heavy production files (render, voice) currently on disk. */
+  onDiskBytes: number;
+  /** On disk and verified in the remote: what "Liberar espacio" would delete. */
+  freeableBytes: number;
+  freeableVideos: number;
+  channels: StorageChannelRow[];
+  /** Latest archived file, to show the folder structure. */
+  example?: string;
+}
+
+export type StorageTargetRequest = { adapter: 'google-drive' } | { adapter: 'local-folder'; root: string } | { adapter: 'none' };
+
+export interface UploadResult {
+  queued: number;
+}
+
+export interface FreeSpaceResult {
+  productions: number;
+  freedBytes: number;
+}
+
+export interface GoogleClientRequest {
+  clientId: string;
+  clientSecret: string;
+}
+
+export interface GoogleAccountStatus {
+  /** OAuth client (desktop app) loaded in the vault. */
+  clientConfigured: boolean;
+  connected: boolean;
+  email?: string;
+  /** Loopback redirect the OAuth client must allow. */
+  redirectUri: string;
+  scope: string;
 }
 
 // ── System ──────────────────────────────────────────────────────────────

@@ -37,7 +37,8 @@ Channel ─┬─< Idea ──< Script ──< Scene
 | bibleTranslation | string? | `RV1909` (ver [08](08-nicho-cristiano.md)) |
 | durationTarget | {min, max} s | por ejemplo 30–60 |
 | brandKitId, voiceProfileId, visualStyleId | fk | |
-| driveFolderId | string? | |
+| driveFolderId | string? | (sin uso: la carpeta del canal se busca por nombre) |
+| autoArchive | bool | sube cada video al archivo después de un QA aprobado |
 | aiLabel | bool | marcar contenido IA al publicar |
 | monetized | bool | bloquea proveedores con licencia no comercial (ADR-008) |
 | active | bool | |
@@ -72,6 +73,7 @@ Una ejecución de un guion para un canal y un formato.
 | status | `pending` \| `running` \| `done` \| `failed` \| `canceled` |
 | inputHashes | JSON por etapa: base de la idempotencia |
 | renderPath, durationMs | |
+| freedAt | "Liberar espacio" borró render y voz del disco (siguen en el archivo) |
 | costUsd | suma de sus CostEntry |
 
 **Etapas** (`stage`):
@@ -85,8 +87,8 @@ scripted → voiced → transcribed → visuals_ready → rendered → qa_passed
 ### Asset
 `productionId?`, `kind` (`voice` \| `words` \| `subs` \| `scene-image` \| `scene-video` \| `music` \| `render` \| `thumb`), `localPath?`, `sha256`, `sizeBytes`, `provider`, `prompt?`, `reusable` (bool, para el banco de recursos), `tags[]`.
 
-### DriveFile
-`assetId`, `driveId`, `folderId`, `md5`, `syncedAt`. Un recurso se considera **hecho** si existe en disco **o** en Drive.
+### DriveFile (`remote_files`)
+**Implementado (Fase 3)** para cualquier `StorageProvider`: `productionId`, `channelId`, `kind` (`render` | `thumb` | `voice` | `script`), `localName`, `providerConfigId`, `remoteId`, `remotePath`, `md5`, `sizeBytes`, `present` (falso si "Sincronizar" no lo encontró), `syncedAt`. Una fila por producción y tipo. Un recurso se considera **hecho** si existe en disco **o** en el archivo.
 
 ### QaReport
 `productionId`, `checks[]` (`{name, passed, value, threshold}`), `passed`.

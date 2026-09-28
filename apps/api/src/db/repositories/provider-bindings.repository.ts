@@ -74,6 +74,14 @@ export class ProviderBindingsRepository {
     return toDomain(row as typeof providerBindings.$inferSelect);
   }
 
+  /** Removes the global binding of a capability (e.g. "no archivar"). */
+  removeGlobal(capability: Capability): void {
+    this.db
+      .delete(providerBindings)
+      .where(and(isNull(providerBindings.channelId), eq(providerBindings.capability, capability)))
+      .run();
+  }
+
   /** Insert-or-update the (channelId, capability, role) binding, for idempotent seeding. */
   upsert(binding: NewProviderBinding): ProviderBinding {
     const roleCondition = binding.role

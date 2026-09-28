@@ -29,6 +29,13 @@
       "when": 1790545204169,
       "tag": "0003_brand_kit",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790550372054,
+      "tag": "0004_storage",
+      "breakpoints": true
     }
   ]
 }

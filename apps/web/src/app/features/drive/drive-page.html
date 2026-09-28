@@ -1,0 +1,186 @@
+<div class="hf-drive">
+  <header class="hf-drive__head">
+    <div>
+      <h1 class="hf-drive__title">
+        {{ isDrive() || !provider() ? 'Drive' : 'Archivo' }}
+        <span class="hf-drive__sep">·</span>
+        <em>{{ headline() }}</em>
+      </h1>
+      @if (provider(); as p) {
+        <p class="hf-drive__subline">
+          <span class="hf-dot" [class.hf-dot--ok]="p.ready" [class.hf-dot--warn]="!p.ready"></span>
+          {{ p.ready ? (isDrive() ? 'Conectado' : 'Disponible') : 'Sin acceso' }}
+          @if (p.root) {
+            · {{ p.root }}
+          }
+          · sincronizado {{ ago(overview()?.lastSyncAt) }}
+        </p>
+      }
+    </div>
+    @if (provider(); as p) {
+      <div class="hf-drive__actions">
+        @if (p.webUrl) {
+          <a class="hf-drive__open" [href]="p.webUrl" target="_blank" rel="noopener">
+            <hf-icon name="external-link" [size]="13" /> Abrir en Drive
+          </a>
+        }
+        <hf-button variant="primary" [loading]="syncing()" [disabled]="!p.ready" (pressed)="sync()">
+          <hf-icon name="refresh" [size]="13" /> Sincronizar ahora
+        </hf-button>
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <hf-skeleton height="140px" />
+    <hf-skeleton height="320px" />
+  } @else if (loadError()) {
+    <hf-empty-state icon="wifi-off" [title]="loadError()!" detail="Verificá que el motor esté corriendo e intentá de nuevo.">
+      <hf-button variant="secondary" (pressed)="load()">Reintentar</hf-button>
+    </hf-empty-state>
+  } @else if (!provider()) {
+    <p class="hf-drive__subline">
+      Elegí dónde se archiva cada video terminado. El disco queda como espacio de trabajo: lo archivado se puede borrar del disco y vuelve
+      cuando lo necesites.
+    </p>
+    <hf-storage-setup [google]="google()" (changed)="onConfigured($event)" />
+  } @else {
+    @if (overview(); as o) {
+      <section class="hf-drive__metrics">
+        <div>
+          <strong>{{ bytes(o.remote.bytes) }}</strong>
+          <span>de Hefesto en {{ remoteName() }}</span>
+        </div>
+        <div>
+          <strong>{{ bytes(o.onDiskBytes) }}</strong>
+          <span>de videos y audio en tu disco</span>
+        </div>
+        <div class="hf-drive__metric--accent">
+          <strong>{{ bytes(o.freeableBytes) }}</strong>
+          <span>liberables en tu disco</span>
+        </div>
+      </section>
+
+      <div class="hf-kinds" role="img" aria-label="Espacio usado por tipo de archivo">
+        @for (k of kinds(); track k.kind) {
+          <span [class]="'hf-kinds__seg hf-kind--' + k.kind" [style.width.%]="k.pct"></span>
+        }
+      </div>
+      <ul class="hf-kinds__legend">
+        @for (k of kinds(); track k.kind) {
+          <li><span [class]="'hf-sw hf-kind--' + k.kind"></span>{{ k.label }} · {{ bytes(k.bytes) }}</li>
+        }
+      </ul>
+
+      <div class="hf-drive__grid">
+        <section class="hf-where">
+          <div class="hf-where__head">
+            <h2>Dónde está cada video</h2>
+            <ul class="hf-where__legend">
+              <li><span class="hf-sw hf-sw--both"></span>Disco + {{ remoteShort() }}</li>
+              <li><span class="hf-sw hf-sw--remote"></span>Solo {{ remoteShort() }}</li>
+              <li><span class="hf-sw hf-sw--disk"></span>Solo disco</li>
+              <li><span class="hf-sw hf-sw--missing"></span>Faltan</li>
+            </ul>
+          </div>
+          @if (channels().length === 0) {
+            <hf-empty-state icon="drive" title="Todavía no hay videos terminados" detail="Cuando un video pase el QA se sube solo." />
+          } @else {
+            <div class="hf-where__row hf-where__row--head">
+              <span>Canal</span><span>Videos</span><span>En disco</span><span>En {{ remoteShort() }}</span><span>Faltan</span><span>Liberable</span>
+            </div>
+            @for (c of channels(); track c.channelId) {
+              <div class="hf-where__row">
+                <span class="hf-where__name">
+                  <hf-icon [name]="c.platform" [size]="13" />
+                  {{ c.channelName }}
+                </span>
+                <span class="hf-where__bar">
+                  <span class="hf-bar">
+                    <span class="hf-sw--both" [style.width.%]="c.bar[0]"></span>
+                    <span class="hf-sw--remote" [style.width.%]="c.bar[1]"></span>
+                    <span class="hf-sw--disk" [style.width.%]="c.bar[2]"></span>
+                    <span class="hf-sw--missing" [style.width.%]="c.bar[3]"></span>
+                  </span>
+                  {{ c.videos }}
+                </span>
+                <span>{{ c.onDisk }}</span>
+                <span>{{ c.inRemote }}</span>
+                <span [class.hf-where__bad]="c.missing > 0">{{ c.missing }}</span>
+                <span>{{ bytes(c.freeableBytes) }}</span>
+              </div>
+            }
+            <div class="hf-where__row hf-where__row--total">
+              <span>Total</span>
+              <span>{{ totals().videos }} videos</span>
+              <span>{{ totals().onDisk }}</span>
+              <span>{{ totals().inRemote }}</span>
+              <span>{{ totals().missing }}</span>
+              <span class="hf-accent">{{ bytes(totals().freeable) }}</span>
+            </div>
+          }
+        </section>
+
+        <aside class="hf-drive__side">
+          <section class="hf-card">
+            <h3 class="hf-label">Liberar espacio</h3>
+            <p>
+              @if (o.freeableVideos > 0) {
+                {{ o.freeableVideos }} video{{ o.freeableVideos === 1 ? ' ya está' : 's ya están' }} en {{ remoteName() }} con checksum
+                verificado. Se borran del disco y vuelven cuando los necesites.
+              } @else {
+                No hay videos verificados en {{ remoteName() }} que ocupen el disco.
+              }
+            </p>
+            <hf-button variant="secondary" [loading]="freeing()" [disabled]="o.freeableVideos === 0" (pressed)="free()">
+              <hf-icon name="trash" [size]="13" /> Liberar {{ bytes(o.freeableBytes) }} del disco
+            </hf-button>
+            <p class="hf-card__fine">Nunca se borra nada que no esté verificado en {{ remoteName() }}.</p>
+          </section>
+
+          @if (totals().diskOnly > 0 && provider()?.ready) {
+            <hf-button variant="secondary" [loading]="uploading()" (pressed)="uploadPending()">
+              <hf-icon name="cloud-upload" [size]="13" /> Subir pendientes · {{ totals().diskOnly }}
+            </hf-button>
+          }
+
+          @if (uploads().length > 0) {
+            <section>
+              <h3 class="hf-label">Subiendo ahora <span>{{ uploads().length }}</span></h3>
+              @for (job of uploads(); track job.id) {
+                <div class="hf-upload">
+                  <span class="hf-upload__name">{{ uploadName(job) }}</span>
+                  <span class="hf-upload__pct">{{ job.status === 'running' ? pct(job) : 'en cola' }}</span>
+                  <span class="hf-upload__bar"><span [style.width.%]="job.progress * 100"></span></span>
+                </div>
+              }
+            </section>
+          }
+
+          @if (provider()?.problem; as problem) {
+            <section class="hf-warn">
+              <hf-icon name="key" [size]="14" />
+              <div>
+                <p>{{ problem }}</p>
+                @if (isDrive()) {
+                  <a routerLink="/ajustes/cuentas">Reconectar <hf-icon name="arrow-right" [size]="12" /></a>
+                }
+              </div>
+            </section>
+          }
+
+          @if (tree().length > 0) {
+            <section>
+              <h3 class="hf-label">Estructura</h3>
+              <ul class="hf-tree">
+                @for (line of tree(); track $index) {
+                  <li [style.padding-left.px]="$index * 12">{{ $index ? '└ ' : '' }}{{ line }}</li>
+                }
+              </ul>
+            </section>
+          }
+        </aside>
+      </div>
+    }
+  }
+</div>

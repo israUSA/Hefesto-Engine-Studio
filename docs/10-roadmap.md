@@ -17,9 +17,17 @@ Estimaciones para un desarrollador con asistencia de IA, a ritmo constante de me
 
 ## Estado actual (27-09-2026)
 
-Avance: MVP (fases 0–2) ≈ 96 % (Fase 2 completa; falta el primer video con claves reales) · proyecto completo ≈ 39 %.
+Avance: MVP (fases 0–2) ≈ 96 % (falta el primer video con claves reales) · Fase 3 ≈ 90 % (falta probar con una cuenta de Google real) · proyecto completo ≈ 48 %.
 
-Hecho el 27-09 (revisión de la Fase 2 en el navegador, modo `--offline`):
+Hecho el 27-09 (Fase 3, Google Drive):
+- [x] `StorageProvider` completo (`put` con progreso, `get`, `exists`, `list`, `location`) con dos adaptadores: **Google Drive** (REST, subida reanudable, MD5 verificado) y **carpeta local o NAS**.
+- [x] OAuth de escritorio con PKCE y loopback en Ajustes → Cuentas y OAuth; tokens en la bóveda cifrada.
+- [x] Etapa `archive` al final del pipeline (lane del proveedor), automática tras un QA aprobado y opción por canal; "Subir" manual.
+- [x] Índice `remote_files`; lo archivado cuenta como hecho y se trae de vuelta si una etapa lo necesita.
+- [x] Vista **Drive** (métricas, dónde está cada video, liberar espacio, subir pendientes, subiendo ahora, estructura) y "Traer de vuelta" en la biblioteca.
+- [x] Mensajes de clave faltante apuntan a Ajustes, no a `.env`.
+
+Revisión de la Fase 2 (27-09, modo `--offline`):
 - [x] Revisadas a mano todas las pantallas; flujo completo idea → guion → aprobar → producir → cola → biblioteca.
 - [x] Arreglado: "Generar ideas" quedaba deshabilitado (el `<select>` mostraba un canal que el modelo no tenía).
 - [x] Arreglado: "Guardar cambios" del guion nunca se habilitaba al editar.
@@ -36,7 +44,9 @@ Pendientes para retomar:
 - [ ] Probar en la PC con la RTX 3050: NVENC, whisper.cpp CUDA y el modelo `large-v3-turbo` (`tools/fetch-binaries.ts` elige solo).
 - [ ] En la laptop (Intel Iris Xe) el render sale con `libx264`, no con QSV: revisar la detección del codificador.
 - [ ] Pantalla Ajustes en pen.dev: los campos de clave todavía dicen ".env" (debe decir "cifrada").
-- [ ] Luego: Fase 3 (Google Drive).
+- [ ] Probar Drive con una cuenta real: crear el cliente OAuth "app de escritorio" en Google Cloud y conectarlo en Ajustes → Cuentas y OAuth.
+- [ ] Mostrar la cuota de espacio de Drive en la vista (el adaptador ya la lee).
+- [ ] Luego: Fase 4 (calidad y variación).
 
 
 ## Fase 0 · Planificación y diseño
@@ -75,11 +85,13 @@ Objetivo: **un comando que produce un short completo** para un canal.
 - ✅ **Entregable**: producir desde la UI sin tocar la consola (probado en modo `--offline`)
 
 ## Fase 3 · Google Drive
-- [ ] OAuth de escritorio (`drive.file`), estructura de carpetas por canal
-- [ ] Subida reanudable en la lane `net`, `DriveFile`, idempotencia disco + Drive
-- [ ] Sincronizar, liberar espacio, traer de vuelta
-- [ ] Vista Drive (tarjetas + tabla "dónde está cada cosa")
-- ✅ **Entregable**: todo lo producido archivado en Drive y el disco liberable
+- [x] OAuth de escritorio (`drive.file`), estructura de carpetas por canal
+- [x] Subida reanudable en la lane `net`, `DriveFile`, idempotencia disco + Drive
+- [x] Sincronizar, liberar espacio, traer de vuelta
+- [x] Vista Drive (tarjetas + tabla "dónde está cada cosa")
+- [x] Alternativa sin cuenta: carpeta local, NAS o "Google Drive para escritorio"
+- [ ] Probar con una cuenta de Google real
+- ✅ **Entregable**: todo lo producido archivado en Drive y el disco liberable (probado con carpeta local y con un Drive simulado)
 
 ## Fase 4 · Calidad y variación
 - [ ] QA automático completo (WER, versículos, LUFS, silencios, zona segura, formato)

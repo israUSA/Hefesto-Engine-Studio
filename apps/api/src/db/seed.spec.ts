@@ -22,7 +22,9 @@ describe('seed', () => {
     expect(result.channels).toEqual([]);
     expect(db.select().from(channels).all()).toHaveLength(0);
     const names = result.providerConfigs.map((c) => c.name).sort();
-    expect(names).toEqual(['gemini-flash', 'gemini-tts', 'ollama-local', 'pexels', 'whisper-local']);
+    expect(names).toEqual(['carpeta-local', 'gemini-flash', 'gemini-tts', 'google-drive', 'ollama-local', 'pexels', 'whisper-local']);
+    // Nothing is archived until the user picks Drive or a folder.
+    expect(result.providerBindings.some((b) => b.capability === 'storage')).toBe(false);
   });
 
   it('creates the default global bindings (text roles with local fallback, tts without)', () => {
@@ -70,7 +72,7 @@ describe('seed', () => {
     expect(result.channels.length).toBeGreaterThan(0);
     expect(result.channels.every((c) => c.slug.startsWith('demo-'))).toBe(true);
     expect(db.select().from(channels).all()).toHaveLength(result.channels.length);
-    expect(db.select().from(providerConfigs).all()).toHaveLength(6);
+    expect(db.select().from(providerConfigs).all()).toHaveLength(8);
     expect(db.select().from(providerBindings).all()).toHaveLength(7);
   });
 

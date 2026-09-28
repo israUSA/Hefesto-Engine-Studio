@@ -25,6 +25,8 @@ export interface Channel {
   voice: VoiceProfile;
   visualStyle: VisualStyle;
   brandKit: BrandKit;
+  /** Upload finished videos to the storage provider after a passing QA (docs/06). */
+  autoArchive: boolean;
 }
 
 /**

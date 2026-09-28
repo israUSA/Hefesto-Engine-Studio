@@ -26,6 +26,8 @@ export class ProviderLaneResolver implements LaneResolver {
         return this.providerLane('stock', ctx.channelId, 'net');
       case 'transcribe':
         return this.providerLane('transcribe', ctx.channelId, 'cpu');
+      case 'archive':
+        return this.providerLane('storage', ctx.channelId, 'net');
       case 'render':
         return (await this.encoder.detect()).usesGpu ? 'gpu' : 'cpu';
       default:

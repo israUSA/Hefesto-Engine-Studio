@@ -10,6 +10,7 @@ const STAGE_LABEL: Record<StageKey, string> = {
   visuals: 'Imágenes',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 const PX_PER_MIN = 44;

@@ -58,7 +58,7 @@ hefesto-engine-studio/
 | `queue` | Cola de trabajos persistente en SQLite, workers, pausar, saltar y reintentar |
 | `providers` | Implementaciones de `TextProvider`, `TtsProvider`, `ImageProvider`, `VideoProvider` |
 | `library` | Listado y búsqueda de recursos generados |
-| `drive` | OAuth, subida, índice y sincronización |
+| `storage` | Vista Drive, OAuth de Google, índice (`remote_files`), sincronizar, liberar y traer de vuelta. La subida es la etapa `archive` del pipeline |
 | `publishing` | Calendario, exportación y subida a YouTube y TikTok |
 | `bible` | Biblia local: búsqueda por referencia y verificación |
 | `costs` | Registro y agregación de costos |

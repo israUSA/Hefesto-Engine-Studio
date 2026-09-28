@@ -60,6 +60,7 @@ export class IdentidadTab {
   basePrompt = '';
 
   readonly brandKit = signal<BrandKit>(DEFAULT_BRAND_KIT);
+  autoArchive = true;
 
   readonly saving = signal(false);
   readonly previewing = signal(false);
@@ -85,6 +86,7 @@ export class IdentidadTab {
         this.motion = channel.visualStyle.motion;
         this.basePrompt = channel.visualStyle.basePrompt ?? '';
         this.brandKit.set(channel.brandKit);
+        this.autoArchive = channel.autoArchive;
       }
     });
   }
@@ -117,6 +119,7 @@ export class IdentidadTab {
           basePrompt: this.basePrompt.trim() || undefined,
         },
         brandKit: this.brandKit(),
+        autoArchive: this.autoArchive,
       })
       .subscribe({
         next: () => {

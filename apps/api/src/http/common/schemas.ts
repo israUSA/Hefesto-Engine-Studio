@@ -49,6 +49,7 @@ export const channelInputSchema = z.object({
   voice: voiceProfileSchema,
   visualStyle: visualStyleSchema,
   brandKit: brandKitSchema.optional(),
+  autoArchive: z.boolean().optional(),
 });
 
 export const channelPatchSchema = channelInputSchema.partial();

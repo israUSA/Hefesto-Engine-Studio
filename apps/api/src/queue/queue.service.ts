@@ -55,6 +55,7 @@ export const STAGE_LABELS: Record<StageKey, string> = {
   visuals: 'Visuales',
   render: 'Render',
   qa: 'QA',
+  archive: 'Archivo',
 };
 
 const SETTING_PAUSED = 'queue.paused';
@@ -415,7 +416,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
     return this.stateChanged();
   }
 
-  async retryProduction(productionId: string, fromStage?: StageKey): Promise<ProductionSummary> {
+  async retryProduction(productionId: string, fromStage?: StageKey, opts: { force?: boolean } = {}): Promise<ProductionSummary> {
     this.ensureStarted();
     if (fromStage && !STAGE_ORDER.includes(fromStage)) throw new BadRequestException(`Etapa desconocida: ${fromStage}`);
     if (this.store.activeForProduction(productionId).length) {
@@ -442,6 +443,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
       topic: last?.payload.topic,
       scriptId: last?.payload.scriptId,
       seq: last?.payload.seq ?? this.nextSeq(),
+      ...(opts.force && { force: true }),
     };
     await this.runner.setStatus(productionId, 'pending');
     await this.enqueueStage(from, payload, last?.priority ?? 0);
@@ -612,6 +614,7 @@ export class QueueService implements QueueApi, OnApplicationBootstrap, OnModuleD
         { productionId: pid, channelId: job.payload.channelId, topic: job.payload.topic, scriptId: job.payload.scriptId },
         job.type,
         {
+          force: job.payload.force,
           signal: active.controller.signal,
           onProgress: (v) => this.onProgress(active, v),
           onEvent: (e) => this.onPipelineEvent(active, e),

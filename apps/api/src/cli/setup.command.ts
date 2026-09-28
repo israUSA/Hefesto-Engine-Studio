@@ -59,6 +59,13 @@ export class SetupCommand extends CommandRunner {
       for (const b of OFFLINE_BINDINGS) {
         this.bindings.upsert({ channelId: null, ...b, providerConfigId: fake.id, params: {}, fallbackIds: [] });
       }
+      const folder = this.configs.findByName('carpeta-local');
+      if (folder) {
+        const root = typeof folder.params['root'] === 'string' && folder.params['root'] ? folder.params['root'] : join(env.home, 'archivo-local');
+        this.configs.update(folder.id, { params: { ...folder.params, root } });
+        this.bindings.upsert({ channelId: null, capability: 'storage', providerConfigId: folder.id, params: {}, fallbackIds: [] });
+        console.log(`✓ Archivo en carpeta local: ${root}`);
+      }
       console.log('✓ Modo sin conexión: texto, voz, stock y transcripción usan el proveedor "fake"');
       console.log('  Para volver a los proveedores reales: setup --reset-bindings');
     }

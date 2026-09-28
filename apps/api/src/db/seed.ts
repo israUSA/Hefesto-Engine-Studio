@@ -57,6 +57,21 @@ const PROVIDER_CONFIGS: SeedProviderConfig[] = [
     params: { keepAlive: 0 },
     enabled: false,
   },
+  {
+    name: 'google-drive',
+    adapter: 'google-drive',
+    capabilities: ['storage'],
+    params: {},
+    secretRef: 'GOOGLE_DRIVE_REFRESH_TOKEN',
+    enabled: true,
+  },
+  {
+    name: 'carpeta-local',
+    adapter: 'local-folder',
+    capabilities: ['storage'],
+    params: { root: '' },
+    enabled: true,
+  },
 ];
 
 /** Offline stand-in for every capability. Only seeded for demos and tests. */

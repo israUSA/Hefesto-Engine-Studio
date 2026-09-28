@@ -8,6 +8,8 @@ import { SECRET_VAULT } from '../secrets/secrets.module';
 import type { SecretVault } from '../secrets/secret-vault';
 import { fakeProviderFactory } from '../providers/adapters/fake';
 import { geminiProviderFactory } from '../providers/adapters/gemini';
+import { googleDriveProviderFactory } from '../providers/adapters/google-drive';
+import { localFolderProviderFactory } from '../providers/adapters/local-folder';
 import { openAiCompatibleProviderFactory } from '../providers/adapters/openai-compatible';
 import { pexelsProviderFactory } from '../providers/adapters/pexels';
 import { LocalBibleLookup } from './adapters/bible-lookup';
@@ -24,6 +26,8 @@ export const PROVIDER_FACTORIES = [
   openAiCompatibleProviderFactory,
   pexelsProviderFactory,
   whisperCppFactory,
+  googleDriveProviderFactory,
+  localFolderProviderFactory,
 ];
 
 @Module({

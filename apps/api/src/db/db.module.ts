@@ -12,6 +12,7 @@ import {
   ProductionsRepository,
   ProviderBindingsRepository,
   ProviderConfigsRepository,
+  RemoteFilesRepository,
   ScriptsRepository,
   SettingsRepository,
 } from './repositories';
@@ -41,6 +42,7 @@ const repositories = [
   IdeasRepository,
   ScriptsRepository,
   SettingsRepository,
+  RemoteFilesRepository,
 ];
 
 @Module({

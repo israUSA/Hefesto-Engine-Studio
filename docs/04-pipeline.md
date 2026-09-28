@@ -13,6 +13,8 @@ Cada etapa:
 
 El hash de cada etapa incluye el de las etapas de las que depende: por defecto la anterior, salvo **Visuales**, que depende solo del **Guion** (un cambio de voz o de brand kit no vuelve a bajar imágenes), y **Render**, que depende de **Subtítulos** y **Visuales**.
 
+Una salida que "Liberar espacio" borró del disco pero está archivada cuenta como hecha; si otra etapa la necesita, se trae de vuelta del archivo (ver [06](06-drive.md)).
+
 Esto permite **"Rehacer escena 3"** o **"Rehacer solo la voz"** sin volver a producir todo.
 
 ## 1 · Idea
@@ -76,8 +78,8 @@ Esto permite **"Rehacer escena 3"** o **"Rehacer solo la voz"** sin volver a pro
 
 Si falla, la producción queda en `qa_failed` con el motivo y un botón para **reintentar solo la etapa culpable**.
 
-## 8 · Drive
-Subida del render, la miniatura, la voz y `script.json`, más el registro en `DriveFile`. Ver [06](06-drive.md).
+## 8 · Archivo (Drive)
+Etapa `archive`, la última de la cola: sube el render, la miniatura, la voz y `script.json` al `StorageProvider` (Google Drive o una carpeta) y los registra en `remote_files` con su MD5. Automática solo tras un QA aprobado y si el canal archiva automáticamente; manual con "Subir". Ver [06](06-drive.md).
 
 ## 9 · Publicar
 Exportación con metadatos, o subida por API cuando esté disponible. Ver [07](07-publicacion.md).
