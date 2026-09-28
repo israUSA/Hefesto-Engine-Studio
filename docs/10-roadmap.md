@@ -38,13 +38,40 @@ Revisión de la Fase 2 (27-09, modo `--offline`):
 - [x] **Brand kit** de subtítulos (fuente, tamaño, colores, mayúsculas) en Canal → Identidad, con vista previa y aplicado al render (ver [03](03-modelo-de-datos.md)). Las plantillas de nicho traen el suyo.
 - [x] Dependencias explícitas entre etapas: las imágenes dependen solo del guion, así que un cambio de voz o de brand kit ya no vuelve a bajar (ni a pagar) el stock.
 
-Pendientes para retomar:
+### Pruebas a mano pendientes
+Todo lo de abajo está cubierto por pruebas automáticas con proveedores simulados, pero nunca se probó contra el servicio real o el hardware real. Hacerlas en cuanto haya claves, cuenta o máquina.
+
+**Claves reales (Gemini y Pexels)**
+- [ ] Cargar las claves en Ajustes → Proveedores (o `npx nx run api:cli keys set GEMINI_API_KEY` y `PEXELS_API_KEY`) y volver a los proveedores reales con `setup --reset-bindings`.
+- [ ] Producir el primer video real de punta a punta: ideas, guion, voz de Gemini TTS, imágenes de Pexels, render y QA.
+- [ ] Comparar el costo registrado (pantalla Producir y `cost_entries`) con lo que marca la consola de Google.
+- [ ] Probar voces de Gemini TTS en español y elegir 2–3 para los canales (Fase 0).
+- [ ] "Probar" de cada proveedor en Ajustes → Proveedores con claves reales.
+
+**Google Drive con una cuenta real** (ver [06](06-drive.md))
+- [ ] En Google Cloud: habilitar la Drive API y crear credenciales OAuth "app de escritorio".
+- [ ] Ajustes → Cuentas y OAuth: pegar ID y secreto, "Conectar con Google" y ver que aparece el correo.
+- [ ] Un video con QA aprobado se sube solo a `Mi unidad/Hefesto Engine Studio/<Canal> (<Plataforma>)/…` (en modo offline no se vio: el QA del proveedor `fake` falla por duración).
+- [ ] "Subir al archivo" de un video con QA fallado y "Subir pendientes" en la vista Drive.
+- [ ] Un archivo de más de 8 MB, cortando el wifi a mitad de la subida: tiene que retomar donde quedó y verificar el MD5.
+- [ ] "Abrir en Drive" abre la carpeta correcta.
+- [ ] Borrar un archivo a mano en Drive → "Sincronizar ahora" → aparece en "Faltan" y "Subir pendientes" lo vuelve a subir.
+- [ ] "Liberar espacio" y después "Traer de vuelta" desde Drive; "Rehacer desde Render" de un video liberado trae la voz de Drive sin llamar al TTS.
+- [ ] "Desconectar" revoca el acceso (ya no aparece en myaccount.google.com → Seguridad → apps con acceso).
+- [ ] Con la pantalla de consentimiento en modo "prueba", a los 7 días el error tiene que pedir "reconectá la cuenta".
+- [ ] Usar como carpeta local la carpeta de "Google Drive para escritorio" (alternativa sin OAuth).
+
+**PC con la RTX 3050**
+- [ ] `tools/fetch-binaries.ts` baja whisper.cpp CUDA y el modelo `large-v3-turbo`.
+- [ ] El render sale con NVENC y Whisper usa CUDA (Ajustes → Sistema / consola).
+- [ ] Una sola tarea de GPU a la vez: producir varios videos y ver que Whisper y el render no se pisan (VRAM ≤ 4 GB).
+
+**Laptop con Intel Iris Xe**
+- [ ] El render sale con `libx264`, no con QSV: revisar la detección del codificador y probar `h264_qsv` a mano.
+
+### Tareas pendientes
 - [ ] Más fuentes OFL para subtítulos en `data/fonts` (hoy solo Archivo Black; se agregan al catálogo `SUBTITLE_FONTS`).
-- [ ] Primer video real con claves de Gemini y Pexels (`npx nx run api:cli keys set GEMINI_API_KEY`).
-- [ ] Probar en la PC con la RTX 3050: NVENC, whisper.cpp CUDA y el modelo `large-v3-turbo` (`tools/fetch-binaries.ts` elige solo).
-- [ ] En la laptop (Intel Iris Xe) el render sale con `libx264`, no con QSV: revisar la detección del codificador.
 - [ ] Pantalla Ajustes en pen.dev: los campos de clave todavía dicen ".env" (debe decir "cifrada").
-- [ ] Probar Drive con una cuenta real: crear el cliente OAuth "app de escritorio" en Google Cloud y conectarlo en Ajustes → Cuentas y OAuth.
 - [ ] Mostrar la cuota de espacio de Drive en la vista (el adaptador ya la lee).
 - [ ] Luego: Fase 4 (calidad y variación).
 
